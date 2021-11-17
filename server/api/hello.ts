@@ -1,1 +1,1 @@
-export default (req, res) => 'Hello World'
+export default (req, res) => 'Hello World';
