@@ -14,7 +14,7 @@ export default {
     }
   },
   methods: {
-    toggleMode (): void {
+    toggleMode () {
       this.dark = !this.dark
     }
   }
