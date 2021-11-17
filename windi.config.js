@@ -1,9 +1,9 @@
-import { defineConfig } from 'windicss/helpers'
+import { defineConfig } from 'windicss/helpers';
 
 export default defineConfig({
-  preflight: false,
-  extract: {
-    include: ['**/*.{vue,html,jsx,tsx}'],
-    exclude: ['node_modules', '.git']
-  }
-})
+	preflight: false,
+	extract: {
+		include: ['**/*.{vue,html,jsx,tsx}'],
+		exclude: ['node_modules', '.git']
+	}
+});

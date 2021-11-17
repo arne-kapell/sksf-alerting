@@ -1,6 +1,8 @@
 {
   "private": true,
   "scripts": {
+    "lint": "eslint --ext \".ts,.js,.vue\" --ignore-path .gitignore --ignore-path .eslintignore .",
+    "lint:fix": "eslint --fix --ext \".js,.ts,.vue\" --ignore-path .gitignore --ignore-path .eslintignore .",
     "dev": "nuxi dev",
     "build": "nuxi build",
     "start": "node .output/server/index.mjs"
@@ -10,16 +12,19 @@
     "@heroicons/vue": "^1.0.5",
     "@nuxt/types": "^2.15.8",
     "@nuxtjs/eslint-config-typescript": "^7.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.4.0",
-    "@typescript-eslint/parser": "^5.4.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-import": "^2.25.3",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "eslint": "^8.0.0",
+    "eslint-config-standard": "latest",
+    "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.1",
-    "eslint-plugin-vue": "^8.0.3",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-vue": "latest",
     "nuxt-windicss": "^2.0.12",
     "nuxt3": "latest",
     "sass": "^1.43.4",
-    "sass-loader": "^12.3.0"
-  }
+    "sass-loader": "^12.3.0",
+    "typescript": "^4.5.2"
+  },
+  "packageManager": "yarn@3.1.0"
 }
