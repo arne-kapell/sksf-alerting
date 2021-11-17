@@ -1,9 +1,10 @@
-{  // https://v3.nuxtjs.org/concepts/typescript
+{  
+  // https://v3.nuxtjs.org/concepts/typescript
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
     "types": [
       "nuxt-windicss",
-      "@nuxt3/types",
+      "@nuxt/types",
       "@types/node"
     ]
   }
