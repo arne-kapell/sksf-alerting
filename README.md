@@ -9,6 +9,8 @@
 
 Yarn is recommended and can be installed [here](https://yarnpkg.com/getting-started/install) or via [HomeBrew](https://formulae.brew.sh/formula/yarn#default) (MacOS) and [Chocolatey](https://community.chocolatey.org/packages/yarn) (Windows).
 
+**If nodejs>=16.10 is installed, just run `corepack enable` to enable yarn.**
+
 Make sure to install the dependencies
 
 ```bash
