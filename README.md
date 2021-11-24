@@ -34,15 +34,11 @@ yarn lint
 yarn lint:fix
 ```
 
-## Production
+## Deployment
 
-Build the application for production:
+The Nuxt application is deployed with Heroku and can be reached at 
 
-```bash
-yarn build
-```
-
-Checkout the [deployment documentation](https://v3.nuxtjs.org/docs/deployment).
+https://sks-f.herokuapp.com/
 
 ## Ideas
 - tailwind theme designer: https://www.vue-tailwind.com/theme-builder
