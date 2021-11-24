@@ -43,3 +43,6 @@ yarn build
 ```
 
 Checkout the [deployment documentation](https://v3.nuxtjs.org/docs/deployment).
+
+## Ideas
+- tailwind theme designer: https://www.vue-tailwind.com/theme-builder
