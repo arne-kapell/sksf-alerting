@@ -6,7 +6,6 @@
       "*": ["*d.ts"]
     },
     "types": [
-      "nuxt-windicss",
       "@nuxt/types",
       "@types/node"
     ]
