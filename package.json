@@ -8,10 +8,10 @@
     "start": "node .output/server/index.mjs"
   },
   "devDependencies": {
-    "@headlessui/vue": "^1.4.2",
     "@heroicons/vue": "^1.0.5",
     "@nuxt/types": "^2.15.8",
     "@nuxtjs/eslint-config-typescript": "^7.0.2",
+    "@nuxtjs/vuetify": "^1.12.1",
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
     "eslint": "^8.0.0",
@@ -20,11 +20,11 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-vue": "latest",
-    "nuxt-windicss": "^2.0.12",
     "nuxt3": "latest",
     "sass": "^1.43.4",
     "sass-loader": "^12.3.0",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "vuetify": "3.0.0-alpha.11"
   },
   "packageManager": "yarn@3.1.0"
 }

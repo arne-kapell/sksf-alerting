@@ -1,7 +1,7 @@
 <template>
   <div id="root" :class="{ 'dark bg-dark-500': dark }">
-    <nav-bar :dark="dark" @toggle-dark="toggleMode" />
-    <HomePage />
+    <v-alert type="success" />
+    <!-- <HomePage /> -->
   </div>
 </template>
 
