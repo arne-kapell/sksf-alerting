@@ -1,9 +1,0 @@
-node_modules/
-.yarn/cache/
-*.log
-.nuxt
-nuxt.d.ts
-.output
-.dccache
-.DS_Store
-.idea/
