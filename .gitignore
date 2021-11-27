@@ -92,3 +92,4 @@ sw.*
 # OSX
 .dccache
 .DS_Store
+.editorconfig

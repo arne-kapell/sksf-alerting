@@ -1,36 +1,36 @@
-declare type AlarmCategory = 'ddos' | 'server failure'
+declare type AlarmCategory = "ddos" | "server failure"
 
 declare type System = {
-    uid: String,
-    name: String,
-    location?: String
+    uid: string,
+    name: string,
+    location?: string
+}
+
+declare type Action = {
+    id: number,
+    content: string,
+    done?: boolean
+}
+
+declare type Checklist = {
+    id: number,
+    category: AlarmCategory,
+    actions: Action[]
 }
 
 declare type Alarm = {
-    uid: String,
+    uid: string,
     category: AlarmCategory[],
     date: Date,
-    risk: Number,
+    risk: number,
     systems?: System[],
     checklist?: Checklist
 }
 
-declare type Action = {
-    id: Number,
-    content: String,
-    done?: Boolean
-}
-
 declare type User = {
-    uid: String,
-    name: String,
-    mail?: String,
-    pwd_hash: String,
-    group_id: Number
-}
-
-declare type Checklist = {
-    id: Number,
-    category: AlarmCategory,
-    actions: Action[]
+    uid: string,
+    name: string,
+    mail?: string,
+    pwdHash: string,
+    groupId: number
 }
