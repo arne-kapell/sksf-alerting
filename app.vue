@@ -1,11 +1,12 @@
 <template>
-  <div id="root" :class="{ 'dark bg-dark-500': dark }">
-    <v-alert type="success" />
-    <!-- <HomePage /> -->
+  <div id="root" >
+    <nav-bar-up>
+    </nav-bar-up>
   </div>
 </template>
 
 <script lang="ts">
+
 
 export default {
   data () {

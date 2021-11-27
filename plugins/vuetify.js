@@ -3,7 +3,10 @@ import { createVuetify } from 'vuetify'
 import {
     VAlert,
     VAppBar,
-    VBtn
+    VBtn,
+    VNavigationDrawer,
+    VToolbar
+
 } from 'vuetify/components'
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -11,7 +14,9 @@ export default defineNuxtPlugin((nuxtApp) => {
         components: {
             VAlert,
             VAppBar,
-            VBtn
+            VBtn,
+            VNavigationDrawer,
+            VToolbar
         }
     })
     nuxtApp.vueApp.use(vuetify)
