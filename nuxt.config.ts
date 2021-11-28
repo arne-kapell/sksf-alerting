@@ -26,7 +26,7 @@ const config: NuxtConfig = {
 	],
 
 	serverMiddleware: [
-		{ path: "/api", handler: "~/server/api/index.ts" }
+		{path: "/api", handler: "~/server/api/index.ts"}
 	],
 
 	auth: {
@@ -43,10 +43,10 @@ const config: NuxtConfig = {
 				// autoFetch: true
 				},
 				endpoints: {
-					login: { url: "/api/login", method: "post" },
-					// logout: { url: "/api/logout", method: "post" },
+					login: { url: "/login", method: "post" },
+					// logout: { url: "/logout", method: "post" },
 					logout: false,
-					user: { url: "/api/user-info", method: "get" }
+					user: { url: "/user-info", method: "get" }
 				}
 			}
 		}
@@ -70,11 +70,30 @@ const config: NuxtConfig = {
 		"@nuxtjs/axios",
 		// https://go.nuxtjs.dev/pwa
 		"@nuxtjs/pwa",
-		"@nuxtjs/auth-next"
+		"@nuxtjs/auth-next",
+		"nuxt-socket-io"
 	],
 
+	io: {
+		sockets: [
+			{
+				name: "alarms",
+				// url: "http://localhost:3000/api/socket.io",
+				url: "http://localhost:3001",
+				default: true,
+				vuex: {
+					actions: [
+						"alarm --> getAlarms"
+					]
+				}
+			},
+		]
+	},
+
 	// Axios module configuration: https://go.nuxtjs.dev/config-axios
-	axios: {},
+	axios: {
+		baseURL: "/api"
+	},
 
 	// PWA module configuration: https://go.nuxtjs.dev/pwa
 	pwa: {
