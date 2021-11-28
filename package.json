@@ -24,6 +24,9 @@
     "jsonwebtoken": "^8.5.1",
     "nuxt": "^2.15.7",
     "nuxt-socket-io": "^2.0.0",
+    "pg": "^8.7.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.12.0-alpha.1",
     "vuetify": "^2.5.5"
   },
   "devDependencies": {
