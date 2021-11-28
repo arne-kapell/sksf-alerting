@@ -44,7 +44,8 @@ const config: NuxtConfig = {
 				},
 				endpoints: {
 					login: { url: "/api/login", method: "post" },
-					logout: { url: "/api/logout", method: "post" },
+					// logout: { url: "/api/logout", method: "post" },
+					logout: false,
 					user: { url: "/api/user-info", method: "get" }
 				}
 			}

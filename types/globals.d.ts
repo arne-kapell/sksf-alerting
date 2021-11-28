@@ -39,6 +39,8 @@ declare type User = {
 
 
 declare type UiUser = {
-    mail: string | null,
-	token: string | null
+    uid: number,
+    name?: string,
+    mail: string,
+    groupId: number
 }

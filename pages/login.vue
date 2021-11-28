@@ -7,7 +7,10 @@
                             <v-container>
                                 <v-text-field v-model="form.email" label="E-Mail" :rules="form.emailRules" required />
                                 <v-text-field v-model="form.password" label="Password" :rules="form.pwRules" required />
-								<v-btn type="submit">login</v-btn>
+								<v-row>
+									<v-btn type="submit">login</v-btn>
+									<v-alert v-if="error" type="error">{{ error }}</v-alert>
+								</v-row>
                             </v-container>
                         </v-form>
                     </v-card>
@@ -22,6 +25,7 @@ export default Vue.extend({
 	data() {
 		return {
 			loading: false,
+			error: false as boolean | string,
 			form: {
 				email: "",
 				emailRules: [
@@ -40,15 +44,20 @@ export default Vue.extend({
 		async login(e: Event) {
 			e.preventDefault();
 			this.loading = true;
-			const res = await this.$auth.loginWith("local", {
-				data: {
-					mail: this.form.email,
-					password: this.form.password
-				}
-			});
-			console.log(res);
-			this.$router.push({name: "dashboard"});
-			this.loading = false;
+			try {
+				await this.$auth.loginWith("local", {
+					data: {
+						mail: this.form.email,
+						password: this.form.password
+					}
+				});
+				this.$router.push({name: "dashboard"});
+			} catch (e) {
+				const message = (e as ErrorEvent).message.split(" ");
+				this.error = message[message.length - 1];
+			} finally {
+				this.loading = false;
+			}
 		}
 	}
 });

@@ -2,10 +2,6 @@ import { GetterTree, ActionTree, MutationTree } from "vuex";
 
 export const state = () => ({
 	alarms: [] as Alarm[],
-	user: {
-		mail: null,
-		token: null
-	} as UiUser
 });
 
 export type RootState = ReturnType<typeof state>
@@ -16,7 +12,7 @@ export const getters: GetterTree<RootState, RootState> = {
 
 export const mutations: MutationTree<RootState> = {
 	ADD_ALARM: (state, newAlarm: Alarm) => (state.alarms.push(newAlarm)),
-	LOGGED_IN: (state, newUser: UiUser) => (state.user = newUser),
+	// LOGGED_IN: (state, newUser: UiUser) => (state.user = newUser),
 };
 
 export const actions: ActionTree<RootState, RootState> = {

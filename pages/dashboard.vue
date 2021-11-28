@@ -2,7 +2,8 @@
     <v-app>
             <v-main>
                 <v-container>
-                     <v-card light>dashboard</v-card>
+                    <v-card light>dashboard</v-card>
+					<v-btn type="reset" @click="logout">logout</v-btn>
                 </v-container>
             </v-main>
     </v-app>
@@ -19,6 +20,10 @@ export default Vue.extend({
 		};
 	},
 	methods: {
+		async logout() {
+			await this.$auth.logout();
+			this.$router.push("/login");
+		},
 		toggleDrawer() {
 			this.drawer = !this.drawer;
 		}

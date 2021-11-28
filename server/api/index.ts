@@ -63,9 +63,7 @@ app.get("/user-info", async (req, res) => {
 		const token = authorization.split(" ")[1];
 		try {
 			const decoded = verify(token, "secret") as { uid: number, mail: string, groupId: number };
-			const uid = decoded.uid;
-			console.log(decoded);
-			const user = userDB.find(u => u.uid == uid);
+			const user = userDB.find(u => u.uid == decoded.uid);
 			if (user) {
 				res.json({
 					user: {
