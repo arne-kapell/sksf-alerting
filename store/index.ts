@@ -1,22 +1,26 @@
 import { GetterTree, ActionTree, MutationTree } from "vuex";
 
 export const state = () => ({
-	things: [] as string[],
-	name: "Me"
+	alarms: [] as Alarm[],
+	user: {
+		mail: null,
+		token: null
+	} as UiUser
 });
 
 export type RootState = ReturnType<typeof state>
 
 export const getters: GetterTree<RootState, RootState> = {
-	name: state => state.name
+	alarms: state => state.alarms
 };
 
 export const mutations: MutationTree<RootState> = {
-	CHANGE_NAME: (state, newName: string) => (state.name = newName)
+	ADD_ALARM: (state, newAlarm: Alarm) => (state.alarms.push(newAlarm)),
+	LOGGED_IN: (state, newUser: UiUser) => (state.user = newUser),
 };
 
 export const actions: ActionTree<RootState, RootState> = {
-	async fetchThings ({ commit }) {
+	async fetchThings({ commit }) {
 		const things = await this.$axios.$get("/things");
 		// eslint-disable-next-line no-console
 		console.log(things);

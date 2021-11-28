@@ -19,10 +19,10 @@
 
 <script lang="ts">
 export default {
-  data() {
-    return {
-      drawer: true,
-    };
-  },
+	data() {
+		return {
+			drawer: true,
+		};
+	},
 };
 </script>

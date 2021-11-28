@@ -25,6 +25,33 @@ const config: NuxtConfig = {
 	plugins: [
 	],
 
+	serverMiddleware: [
+		{ path: "/api", handler: "~/server/api/index.ts" }
+	],
+
+	auth: {
+		strategies: {
+			local: {
+				token: {
+					property: "token",
+					global: true,
+				// required: true,
+				// type: 'Bearer'
+				},
+				user: {
+					property: "user",
+				// autoFetch: true
+				},
+				endpoints: {
+					login: { url: "/api/login", method: "post" },
+					logout: { url: "/api/logout", method: "post" },
+					user: { url: "/api/user-info", method: "get" }
+				}
+			}
+		}
+	},
+
+
 	// Auto import components: https://go.nuxtjs.dev/config-components
 	components: true,
 
@@ -41,7 +68,8 @@ const config: NuxtConfig = {
 		// https://go.nuxtjs.dev/axios
 		"@nuxtjs/axios",
 		// https://go.nuxtjs.dev/pwa
-		"@nuxtjs/pwa"
+		"@nuxtjs/pwa",
+		"@nuxtjs/auth-next"
 	],
 
 	// Axios module configuration: https://go.nuxtjs.dev/config-axios
@@ -75,7 +103,9 @@ const config: NuxtConfig = {
 
 	// Build Configuration: https://go.nuxtjs.dev/config-build
 	build: {
-	}
+	},
+
+	ssr: true
 };
 
 export default config;
