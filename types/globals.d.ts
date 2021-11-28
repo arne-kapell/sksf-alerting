@@ -22,7 +22,7 @@ declare type Risk = "low" | "medium" | "high"
 
 declare type Alarm = {
     uid: string,
-    category: AlarmCategory[],
+    category: AlarmCategory,
     datetime: Date,
     risk: Risk,
     source: Source,
