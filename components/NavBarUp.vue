@@ -1,18 +1,21 @@
 <template>
   <nav>
-    <v-toolbar color="primary">
-      <v-toolbar-title>
+    <v-app-bar color="primary">
+      <v-app-bar-nav-icon class="grey--text" @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-toolbar-title class="text-uppercase grey--text">
         <span>Projekt</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn>
+      <v-btn color="grey">
+      <span>Logout</span>
+      </v-btn>
+      <v-btn color="grey">
         <span>Logout</span>
       </v-btn>
-    </v-toolbar>
+    </v-app-bar>
 
-    <v-navigation-drawer v-model="drawer" app class="grey">
+    <v-navigation-drawer v-model="drawer" temporary app >
       <p>Test</p>
-      <p></p>
     </v-navigation-drawer>
   </nav>
 </template>
@@ -21,7 +24,7 @@
 export default {
   data() {
     return {
-      drawer: true,
+      drawer: false,
     };
   },
 };
