@@ -42,11 +42,22 @@
           <v-col>
             {{ alert.handlungsbedarf }}
           </v-col>
-          <v-col>
-            <v-btn class="alert-button">
+          <v-col v-if="alert.risiko < 50">
+            <v-btn color="#f4f7fc">
               HIER KLICKEN
             </v-btn>
           </v-col>
+          <v-col v-else-if="alert.risiko >= 50 && alert.risiko < 75">
+            <v-btn color="yellow">
+              HIER KLICKEN
+            </v-btn>
+          </v-col>
+          <v-col v-else-if="alert.risiko >= 75">
+            <v-btn color="red">
+              HIER KLICKEN
+            </v-btn>
+          </v-col>
+
         </V-item>
         </v-row>
       </v-item-group>
@@ -59,14 +70,11 @@
 </template>
 
 <script>
-
 export default {
   data () {
-    function getButtonColor() {
-      return 4.0;
-    }
-
     return {
+
+
       headers: [
         {
           text: 'Dessert (100g serving)',
@@ -84,75 +92,66 @@ export default {
         {
           name: 'Frozen Yogurt',
           zeitpunkt: '12:34',
-          risiko: '75%',
+          risiko: 75,
           handlungsbedarf: 'Ja',
-          detailscolor: getButtonColor(),
         },
         {
           name: 'Ice cream sandwich',
           zeitpunkt: 159,
           risiko: 6.0,
-          handlungsbedarf: 24,
-          detailscolor: 4.0,
+          handlungsbedarf: 'Nein',
         },
         {
           name: 'Eclair',
           zeitpunkt: 159,
-          risiko: 6.0,
-          handlungsbedarf: 24,
-          detailscolor: 4.0,
+          risiko: 55,
+          handlungsbedarf: 'Nein',
         },
         {
           name: 'Cupcake',
           zeitpunkt: 159,
-          risiko: 6.0,
-          handlungsbedarf: 24,
-          detailscolor: 4.0,
+          risiko: 25,
+          handlungsbedarf: 'Nein',
         },
         {
           name: 'Gingerbread',
           zeitpunkt: 159,
           risiko: 6.0,
-          handlungsbedarf: 24,
-          detailscolor: 4.0,
+          handlungsbedarf: 'Nein',
         },
         {
           name: 'Jelly bean',
           zeitpunkt: 159,
           risiko: 6.0,
-          handlungsbedarf: 24,
-          detailscolor: 4.0,
+          handlungsbedarf: 'Nein',
         },
         {
           name: 'Lollipop',
           zeitpunkt: 159,
-          risiko: 6.0,
-          handlungsbedarf: 24,
-          detailscolor: 4.0,
+          risiko: 75,
+          handlungsbedarf: 'Ja',
         },
         {
           name: 'Honeycomb',
           zeitpunkt: 159,
-          risiko: 6.0,
-          handlungsbedarf: 24,
-          detailscolor: 4.0,
+          risiko: 33,
+          handlungsbedarf: 'Nein',
         },
         {
           name: 'Donut',
           zeitpunkt: 159,
-          risiko: 6.0,
-          handlungsbedarf: 24,
-          detailscolor: 4.0,
+          risiko: 22,
+          handlungsbedarf: 'Nein',
         },
         {
           name: 'KitKat',
           zeitpunkt: 159,
-          risiko: 6.0,
-          handlungsbedarf: 24,
-          detailscolor: 4.0,
+          risiko: 88,
+          handlungsbedarf: 'Ja',
         },
       ],
     }
+
   },
 }
 </script>
@@ -169,4 +168,5 @@ export default {
 #aler-list-sheet {
   border-radius: 6px;
 }
+
 </style>
