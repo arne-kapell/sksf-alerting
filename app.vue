@@ -1,16 +1,21 @@
 <template>
-  <div id="root" >
+  <v-app id="root" >
     <HomePage />
+      <AlarmListe/>
       <CheckListe/>
-  </div>
+  </v-app>
 </template>
 
 <script lang="ts">
 
 
 import CheckListe from "./components/CheckListe.vue";
+import AlarmListe from "./components/AlarmListe.vue";
 export default {
-  components: {CheckListe},
+  components: {
+    AlarmListe,
+    CheckListe
+    },
 }
 </script>
 
@@ -26,6 +31,6 @@ body {
   margin: 0;
   padding: 0;
   overflow-y: scroll;
-
+  background-color: #f4f7fc;
 }
 </style>
