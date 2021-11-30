@@ -7,7 +7,6 @@
 
 <script lang="ts">
 
-import NavBar from "./components/NavBar.vue";
 import AlarmListe from "./components/AlarmListe.vue";
 export default {
   components: {AlarmListe},

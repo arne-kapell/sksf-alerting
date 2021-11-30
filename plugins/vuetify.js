@@ -13,10 +13,12 @@ import {
     VCol,
     VRow,
     VSpacer,
-    VDivider
+    VDivider,
+    VAppBar,
+    VNavigationDrawer,
+    VToolbar
 
-
-} from "vuetify/components";
+} from 'vuetify/components'
 
 export default defineNuxtPlugin((nuxtApp) => {
     const vuetify = createVuetify({
@@ -32,7 +34,10 @@ export default defineNuxtPlugin((nuxtApp) => {
             VCol,
             VRow,
             VSpacer,
-            VDivider
+            VDivider,
+            VAppBar,
+            VNavigationDrawer,
+            VToolbar
         }
     })
     nuxtApp.vueApp.use(vuetify)
