@@ -1,9 +1,20 @@
 import { defineNuxtPlugin } from '#app'
 import { createVuetify } from 'vuetify'
+
 import {
+    VApp,
     VAlert,
-    VAppBar,
+    VDataTable,
     VBtn,
+    VCard,
+    VItemGroup,
+    VItem,
+    VSheet,
+    VCol,
+    VRow,
+    VSpacer,
+    VDivider,
+    VAppBar,
     VNavigationDrawer,
     VToolbar
 
@@ -12,9 +23,19 @@ import {
 export default defineNuxtPlugin((nuxtApp) => {
     const vuetify = createVuetify({
         components: {
+            VApp,
+            VDataTable,
             VAlert,
-            VAppBar,
             VBtn,
+            VItemGroup,
+            VCard,
+            VItem,
+            VSheet,
+            VCol,
+            VRow,
+            VSpacer,
+            VDivider,
+            VAppBar,
             VNavigationDrawer,
             VToolbar
         }

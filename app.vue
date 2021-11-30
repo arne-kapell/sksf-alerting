@@ -1,24 +1,15 @@
 <template>
-  <div id="root" >
-    <nav-bar-up>
-    </nav-bar-up>
-  </div>
+  <v-app id="root" >
+    <HomePage />
+      <AlarmListe/>
+  </v-app>
 </template>
 
 <script lang="ts">
 
-
+import AlarmListe from "./components/AlarmListe.vue";
 export default {
-  data () {
-    return {
-      dark: true
-    }
-  },
-  methods: {
-    toggleMode () {
-      this.dark = !this.dark
-    }
-  }
+  components: {AlarmListe},
 }
 </script>
 
@@ -34,5 +25,6 @@ body {
   margin: 0;
   padding: 0;
   overflow-y: scroll;
+  background-color: #f4f7fc;
 }
 </style>
