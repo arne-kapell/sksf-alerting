@@ -1,7 +1,10 @@
 import express, { json, NextFunction, Request, Response } from "express";
+import { Server, Socket } from "socket.io";
 import { hash, compare } from "bcrypt";
 import { sign, verify } from "jsonwebtoken";
+import * as portUsed from "tcp-port-used";
 const app = express();
+let io: Server | null = null;
 
 app.use(json());
 app.all("/tinf20cs1", (req, res) => {
@@ -32,30 +35,83 @@ const alarmDB: Alarm[] = [
 	}
 ];
 
-// Authentication middleware
-const auth = (req: Request, res: Response, next: NextFunction) => {
-	if (["/login", "/register"].includes(req.path)) next(); 
-	else {
-		const { authorization } = req.headers;
-		if (authorization && authorization.split(" ")[0] === "Bearer" && authorization.split(" ")[1]) {
-			const token = authorization.split(" ")[1];
-			try {
-				const decoded = verify(token, "secret") as { uid: number, mail: string, groupId: number };
-				const user = userDB.find(u => u.uid == decoded.uid);
-				if (user) {
-					res.locals.user = user;
-					next();
-				} else {
-					res.status(401).json({ error: "Invalid token" });
-				}
-			} catch (e) {
-				res.status(401).json({ error: "Invalid token" });
-			}
+import db from "../models";
+db.sequelize.sync();
+
+// Authentication middlewares
+const auth: (token: string) => boolean | User = (token) => {
+	try {
+		const decoded = verify(token, "secret") as { uid: number, mail: string, groupId: number };
+		const user = userDB.find(u => u.uid == decoded.uid);
+		if (user) {
+			return user;
 		} else {
-			res.status(401).json({ error: "No token provided" });
+			return false;
 		}
+	} catch (e) {
+		return false;
+	}		
+};
+const expressAuth = (req: Request, res: Response, next: NextFunction) => {
+	const { authorization } = req.headers;
+	if (authorization && authorization.split(" ")[0] === "Bearer" && authorization.split(" ")[1]) {
+		const token = authorization.split(" ")[1];
+		const user = auth(token);
+		if (user) {
+			res.locals.user = user;
+			next();				
+		} else {
+			res.status(401).json({ error: "Invalid token" });
+		}
+	} else {
+		res.status(401).json({ error: "No token provided" });
 	}
 };
+const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
+	const { authorization } = socket.handshake.headers;
+	if (authorization && authorization.split(" ")[0] === "Bearer" && authorization.split(" ")[1]) {
+		const token = authorization.split(" ")[1];
+		const user = auth(token);
+		if (user) {
+			next();
+		} else {
+			next(new Error("Invalid token"));
+		}
+	} else {
+		next(new Error("No token provided"));
+	}
+};
+
+app.use(async (req, res, next) => {
+	if (!io) {
+		const running = await portUsed.check(3001);
+		if (running) {
+			console.warn("Socket.io server already running, if in development mode please restart nuxt!");
+		} else {
+			io = new Server(3001, {
+				cors: {
+					origin: "http://localhost:3000",
+					methods: ["GET", "POST"]
+				}
+			});
+			// console.log(io.httpServer);
+			io.path("/socket.io");
+			console.info("Started socket.io server");
+		
+			io.use(socketAuth);
+		
+			io.on("connection", async (socket) => {
+				socket.join("alarms");
+				console.log("Client connected | sockets:", await io?.allSockets());
+				socket.on("disconnect", async () => {
+					console.log("Client disconnected | sockets:", await io?.allSockets());
+				});
+			});
+		}
+	}
+	next();
+});
+
 
 // Authentication endpoints
 app.post("/login", async (req, res) => {
@@ -100,7 +156,7 @@ app.post("/register", async (req, res) => {
 	}
 });
 
-app.get("/user-info", auth, async (req, res) => {
+app.get("/user-info", expressAuth, async (req, res) => {
 	const user = res.locals.user;
 	res.json({
 		user: {
@@ -131,14 +187,38 @@ app.post("/realtime-alarm", async (req, res) => {
 	} else {
 		alarmDB.push(mapAlarm(alarm));
 	}
+	io?.emit("alarm");
 	res.json({ success: true });
 });
 
 // alarm endpoint for ui
-app.get("/alarms", auth, async (req, res) => {
+app.get("/alarms", expressAuth, async (req, res) => {
 	res.json({
 		alarms: alarmDB
 	});
+});
+
+// endpoint for high-level passenger information
+app.get("/passenger/information", (req, res) => {
+	res.json({
+		count: alarmDB.length,
+		alarms: alarmDB.map(a => {
+			const date = new Date(a.datetime);
+			const diff = Math.abs(date.getTime() - new Date().getTime());
+			const diffMinutes = Math.floor((diff / 1000) / 60);
+			return {
+				since: (diffMinutes > 0) ? diffMinutes + " minutes" : "just now",
+				risk: a.risk,
+				system: a.source.name
+			};
+		})
+	});
+});
+
+process.on("SIGCHLD", () => {
+	console.log("child");
+	// io?.close();
+	// process.exit();
 });
 
 module.exports = app;

@@ -12,14 +12,15 @@ export const getters: GetterTree<RootState, RootState> = {
 
 export const mutations: MutationTree<RootState> = {
 	ADD_ALARM: (state, newAlarm: Alarm) => (state.alarms.push(newAlarm)),
+	SET_ALARMS: (state, alarms: Alarm[]) => (state.alarms = alarms),
 	// LOGGED_IN: (state, newUser: UiUser) => (state.user = newUser),
 };
 
 export const actions: ActionTree<RootState, RootState> = {
-	async fetchThings({ commit }) {
-		const things = await this.$axios.$get("/things");
+	async getAlarms({ commit }) {
+		const alarms = await this.$axios.$get("/alarms");
 		// eslint-disable-next-line no-console
-		console.log(things);
-		commit("CHANGE_NAME", "New name");
+		console.log("fetched alarms", alarms);
+		commit("SET_ALARMS", alarms);
 	}
 };

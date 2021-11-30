@@ -5,8 +5,8 @@
                     <v-card shaped light :loading="loading">
                         <v-form v-model="form.valid" @submit="login">
                             <v-container>
-                                <v-text-field v-model="form.email" label="E-Mail" :rules="form.emailRules" required />
-                                <v-text-field v-model="form.password" label="Password" :rules="form.pwRules" required />
+                                <v-text-field type="text" v-model="form.email" label="E-Mail" :rules="form.emailRules" required />
+                                <v-text-field type="password" v-model="form.password" label="Password" :rules="form.pwRules" required />
 								<v-row>
 									<v-btn type="submit">login</v-btn>
 									<v-alert v-if="error" type="error">{{ error }}</v-alert>
