@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer permanent height="100%" width="15%" mobile-breakpoint="">
+  <v-navigation-drawer permanent height="100%" width="12%" mobile-breakpoint="">
     <v-divider></v-divider>
     <v-list-item>
         <v-list-item-content>
@@ -35,8 +35,8 @@
       selectedItem: 1,
       items: [
         { text: 'Home', icon: 'mdi-home' },
-        { text: 'Analytics', icon: 'mdi-flag' },
-        { text: 'Inbox', icon: 'mdi-email' },
+        { text: 'Alarmliste', icon: 'mdi-flag' },
+        { text: 'Checkliste', icon: 'mdi-email' },
         { text: 'Account', icon: 'mdi-account-box' },
       ],
     }),
