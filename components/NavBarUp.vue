@@ -5,21 +5,16 @@
       <v-toolbar-title class="text--center grey--text">
         <span>Projekt</span>
       </v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn color="grey" to="/login">
+      <v-spacer> </v-spacer>
+ <v-btn color="grey" to="/login">
         <span>Logout</span>
       </v-btn>
-      <v-btn color="warning" fab dark>
+    </v-toolbar>
+     <v-btn color="warning" fab dark>
               <v-icon>mdi-account</v-icon>
             </v-btn> 
     </v-app-bar> 
-    
-  <!--  //<v-main>
-    //  <v-container class="fill-height" fluid>
-    //    <router-view></router-view>
-    //  </v-container>
-    //</v-main> -->
-
+<!-- 
     <v-navigation-drawer v-model="drawer" fixed app color="orange darker-2" dark>
       <v-list>
           <v-list-item-group>
@@ -58,21 +53,20 @@
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
-  </nav>
+-->
+</nav>  
 </template>
 
-<script lang="ts">
-export default {
-  data() {
-    return {
-      drawer: false,
-
-    };
-  },
-};
+<script lang="ts>
+  export default {
+      name:"NavBarUp",
+      data(){
+          return{
+              drawer: true
+          }
+      }
+  }
 </script>
-
-
 <style>
 
 </style>
