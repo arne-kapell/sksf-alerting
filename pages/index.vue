@@ -1,3 +1,4 @@
+
 <template>
   <div id="root" >
     <nav-bar-up/>
@@ -7,26 +8,15 @@
 </template>
 
 <script lang="ts">
-import NavBarUp from '../components/NavBarUp.vue'
-import MenuSide from '../components/MenuSide.vue'
-export default {
-    name: 'App',
-    components:  {
-      MenuSide,
-      NavBarUp
-        },
-  
-     data() {
-    return {
-    dark: true
-    }
-    },
-    methods: {
-        toggleMode () {
-        //this.dark = !this.dark
-        }
-    }
-}
+import Vue from "vue";
+export default Vue.extend({
+	layout: "main",
+	data() {
+		return {
+			dark: true
+		};
+	}
+});
 </script>
 
 <style>

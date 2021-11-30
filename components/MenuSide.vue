@@ -29,16 +29,16 @@
 </template>
   
 <script>
-	export default {
-		name:"MenuSide",
-    data: () => ({
-      selectedItem: 1,
-      items: [
-        { text: 'Home', icon: 'mdi-home' },
-        { text: 'Alarmliste', icon: 'mdi-flag' },
-        { text: 'Checkliste', icon: 'mdi-email' },
-        { text: 'Account', icon: 'mdi-account-box' },
-      ],
-    }),
-	}
+export default {
+	name:"MenuSide",
+	data: () => ({
+		selectedItem: 1,
+		items: [
+			{ text: "Home", icon: "mdi-home" },
+			{ text: "Alarmliste", icon: "mdi-flag" },
+			{ text: "Checkliste", icon: "mdi-email" },
+			{ text: "Account", icon: "mdi-account-box" },
+		],
+	}),
+};
 </script>
