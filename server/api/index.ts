@@ -82,8 +82,10 @@ const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
 	}
 };
 
+import * as dbConfig from "../db.config";
 app.use(async (req, res, next) => {
 	if (!io) {
+		console.log(dbConfig.PASSWORD.length);
 		const running = await portUsed.check(3001);
 		if (running) {
 			console.warn("Socket.io server already running, if in development mode please restart nuxt!");
@@ -213,12 +215,6 @@ app.get("/passenger/information", (req, res) => {
 			};
 		})
 	});
-});
-
-process.on("SIGCHLD", () => {
-	console.log("child");
-	// io?.close();
-	// process.exit();
 });
 
 module.exports = app;

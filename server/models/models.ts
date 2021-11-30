@@ -1,6 +1,6 @@
-import { Sequelize } from "sequelize/dist";
+import { Sequelize } from "sequelize";
 
-module.exports = (sequelize:Sequelize, Sequelize:any) => {
+module.exports = (sequelize: Sequelize, Sequelize: any) => {
 	const User = sequelize.define("user", {
 		uid: {
 			type: Sequelize.NUMBER
@@ -21,7 +21,7 @@ module.exports = (sequelize:Sequelize, Sequelize:any) => {
 	return User;
 };
 
-module.exports = (sequelize:Sequelize, Sequelize:any) => {
+module.exports = (sequelize: Sequelize, Sequelize: any) => {
 	const Action = sequelize.define("action", {
 		id: {
 			type: Sequelize.NUMBER
@@ -36,7 +36,7 @@ module.exports = (sequelize:Sequelize, Sequelize:any) => {
 	return Action;
 };
 
-module.exports = (sequelize:Sequelize, Sequelize:any) => {
+module.exports = (sequelize: Sequelize, Sequelize: any) => {
 	const Source = sequelize.define("source", {
 		uid: {
 			type: Sequelize.NUMBER
@@ -51,7 +51,7 @@ module.exports = (sequelize:Sequelize, Sequelize:any) => {
 	return Source;
 };
 
-module.exports = (sequelize:Sequelize, Sequelize:any) => {
+module.exports = (sequelize: Sequelize, Sequelize: any) => {
 	const Checklist = sequelize.define("checklist", {
 		id: {
 			type: Sequelize.NUMBER
@@ -66,7 +66,7 @@ module.exports = (sequelize:Sequelize, Sequelize:any) => {
 	return Checklist;
 };
 
-module.exports = (sequelize:Sequelize, Sequelize:any) => {
+module.exports = (sequelize: Sequelize, Sequelize: any) => {
 	const Alarm = sequelize.define("alarm", {
 		uid: {
 			type: Sequelize.NUMBER
