@@ -2,6 +2,7 @@ import express, { json, NextFunction, Request, Response } from "express";
 import { Server, Socket } from "socket.io";
 import { hash, compare } from "bcrypt";
 import { sign, verify } from "jsonwebtoken";
+import * as portUsed from "tcp-port-used";
 const app = express();
 let io: Server | null = null;
 
@@ -33,6 +34,9 @@ const alarmDB: Alarm[] = [
 		}
 	}
 ];
+
+import db from "../models";
+db.sequelize.sync();
 
 // Authentication middlewares
 const auth: (token: string) => boolean | User = (token) => {
@@ -80,25 +84,30 @@ const socketAuth = (socket: Socket, next: (err?: Error) => void) => {
 
 app.use(async (req, res, next) => {
 	if (!io) {
-		console.log("creating socket.io server...");
-		io = new Server(Number(process.env.PORT) || 3001, {
-			cors: {
-				origin: "http://localhost:3000",
-				methods: ["GET", "POST"]
-			}
-		});
-		io.path("/socket.io");
-		console.log("created socket.io server | sockets:", await io.allSockets());
-		
-		io.use(socketAuth);
-		
-		io.on("connection", async (socket) => {
-			socket.join("alarms");
-			console.log("Client connected | sockets:", await io?.allSockets());
-			socket.on("disconnect", async () => {
-				console.log("Client disconnected | sockets:", await io?.allSockets());
+		const running = await portUsed.check(3001);
+		if (running) {
+			console.warn("Socket.io server already running, if in development mode please restart nuxt!");
+		} else {
+			io = new Server(3001, {
+				cors: {
+					origin: "http://localhost:3000",
+					methods: ["GET", "POST"]
+				}
 			});
-		});
+			// console.log(io.httpServer);
+			io.path("/socket.io");
+			console.info("Started socket.io server");
+		
+			io.use(socketAuth);
+		
+			io.on("connection", async (socket) => {
+				socket.join("alarms");
+				console.log("Client connected | sockets:", await io?.allSockets());
+				socket.on("disconnect", async () => {
+					console.log("Client disconnected | sockets:", await io?.allSockets());
+				});
+			});
+		}
 	}
 	next();
 });
@@ -187,6 +196,29 @@ app.get("/alarms", expressAuth, async (req, res) => {
 	res.json({
 		alarms: alarmDB
 	});
+});
+
+// endpoint for high-level passenger information
+app.get("/passenger/information", (req, res) => {
+	res.json({
+		count: alarmDB.length,
+		alarms: alarmDB.map(a => {
+			const date = new Date(a.datetime);
+			const diff = Math.abs(date.getTime() - new Date().getTime());
+			const diffMinutes = Math.floor((diff / 1000) / 60);
+			return {
+				since: (diffMinutes > 0) ? diffMinutes + " minutes" : "just now",
+				risk: a.risk,
+				system: a.source.name
+			};
+		})
+	});
+});
+
+process.on("SIGCHLD", () => {
+	console.log("child");
+	// io?.close();
+	// process.exit();
 });
 
 module.exports = app;

@@ -2,7 +2,7 @@ const HOST = "195.62.33.39";
 const USER = "ui";
 const PASSWORD = process.env.DB_PASSWORD || "";
 const DB = "ui";
-const dialect = "postgres";
+const dialect = "mysql";
 const pool = {
 	max: 5,
 	min: 0,
