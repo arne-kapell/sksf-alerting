@@ -1,21 +1,25 @@
 # SKS-F Alerting UI
 
-... nutzt Nuxt v3 (basierend auf Vue v3).
+... nutzt Nuxt v2 (basierend auf Vue v2).
 ## Useful Links
 
-[Nuxt.js documentation (short)](https://v3.nuxtjs.org/docs) | [Vue.js guide (more details)](https://v3.vuejs.org/guide)
+[Nuxt.js documentation (short)](https://nuxtjs.org/docs/2.x) | [Vue.js guide (more details)](https://v3.vuejs.org/guide)
 
-## Setup
+## Build Setup
 
 Yarn is recommended and can be installed [here](https://yarnpkg.com/getting-started/install). Alternative packages can be installed via [HomeBrew](https://formulae.brew.sh/formula/yarn#default) (MacOS) or [Chocolatey](https://community.chocolatey.org/packages/yarn) (Windows).
 
 **If nodejs>=16.10 is installed, just run `corepack enable` to enable yarn.**
 
-Make sure to install the dependencies
-
 ```bash
-yarn install
+# install dependencies
+$ yarn install
+
+# serve with hot reload at localhost:3000
+$ yarn dev
 ```
+
+For detailed explanation on how things work, check out the [documentation](https://nuxtjs.org).
 
 ## Development
 
@@ -39,6 +43,3 @@ yarn lint:fix
 The Nuxt application is deployed with Heroku and can be reached at 
 
 https://sks-f.herokuapp.com/
-
-## Ideas
-- tailwind theme designer: https://www.vue-tailwind.com/theme-builder
