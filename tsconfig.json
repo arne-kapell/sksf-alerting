@@ -18,6 +18,7 @@
     "paths": {
       "*": [
         "*.d.ts",
+        "types/*",
         "node_modules/*"
       ],
       "~/*": [
@@ -35,7 +36,8 @@
       "@nuxt/types",
       "@nuxtjs/axios",
       "@types/node",
-      "vuetify"
+      "vuetify",
+      "@nuxtjs/auth-next"
     ]
   },
   "exclude": [

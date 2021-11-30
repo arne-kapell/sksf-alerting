@@ -15,10 +15,13 @@
     "*.{ts,js,vue}": "eslint  --ignore-path .gitignore --ignore-path .eslintignore"
   },
   "dependencies": {
+    "@nuxtjs/auth-next": "5.0.0-1637745161.ea53f98",
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/pwa": "^3.3.5",
+    "bcrypt": "^5.0.1",
     "core-js": "^3.15.1",
     "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
     "nuxt": "^2.15.7",
     "vuetify": "^2.5.5"
   },
@@ -29,6 +32,8 @@
     "@nuxtjs/eslint-config-typescript": "^6.0.1",
     "@nuxtjs/eslint-module": "^3.0.2",
     "@nuxtjs/vuetify": "^1.12.1",
+    "@types/bcrypt": "^5.0.0",
+    "@types/jsonwebtoken": "^8.5.6",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "eslint": "^7.29.0",
