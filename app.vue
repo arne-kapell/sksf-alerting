@@ -2,14 +2,20 @@
   <v-app id="root" >
     <HomePage />
       <AlarmListe/>
+      <CheckListe/>
   </v-app>
 </template>
 
 <script lang="ts">
 
+
+import CheckListe from "./components/CheckListe.vue";
 import AlarmListe from "./components/AlarmListe.vue";
 export default {
-  components: {AlarmListe},
+  components: {
+    AlarmListe,
+    CheckListe
+    },
 }
 </script>
 
