@@ -11,7 +11,6 @@
         <v-data-table
           :headers="headers"
           :items="desserts"
-          :items-per-page="5"
           class="elevation-1"
         >
 

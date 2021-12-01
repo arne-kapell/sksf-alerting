@@ -6,7 +6,7 @@
         <v-col class="col-2" id="menu-side">
           <MenuSide/>
         </v-col>
-        <v-col class="col-6 offset-1">
+        <v-col class="col-7 offset-1">
           <AlarmListe/>
         </v-col>
       </v-container>
@@ -51,5 +51,9 @@ body {
 #menu-side {
   padding: 0;
   gap: 0;
+}
+.col-6 {
+  max-width: 100%;
+  flex: 100%;
 }
 </style>
