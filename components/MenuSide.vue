@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer permanent height="100%" width="12%" mobile-breakpoint="">
+  <v-navigation-drawer permanent height="100%"  mobile-breakpoint="">
     <v-divider></v-divider>
     <v-list-item>
         <v-list-item-content>
@@ -27,7 +27,7 @@
     </v-list>
   </v-navigation-drawer>
 </template>
-  
+
 <script>
 export default {
 	name:"MenuSide",

@@ -1,172 +1,344 @@
 <template>
-  <div class="v-container">
+  <div class="v-container col-6"
+       id="alert-list-sheet"
+  >
     <v-sheet
-    id="aler-list-sheet"
     color="white"
     elevation="5"
     >
-      <div class="v-container" id="alert-list-header">
-        <v-row>
-      <!--TABLE HEADER-->
-          <v-col>
-            ALERTNAME
-          </v-col>
-          <v-col>
-            ZEITPUNKT
-          </v-col>
-          <v-col>
-           RISIKO
-          </v-col>
-          <v-col>
-            HANDLUNGSBEDARF
-          </v-col>
-          <v-col>
-            DETAILS
-          </v-col>
-       </v-row>
-      </div>
-      <!--ITEMS EINFÜGEN-->
-      <div class="v-container">
-      <v-item-group v-for="(alert, index) in alerts" :key ="alert + index">
-        <v-row>
-        <V-item class="alert-item">
-          <v-col>
-            {{alert.name}}
-          </v-col>
-          <v-col>
-            {{ alert.zeitpunkt }}
-          </v-col>
-          <v-col>
-            {{ alert.risiko }}
-          </v-col>
-          <v-col>
-            {{ alert.handlungsbedarf }}
-          </v-col>
-          <v-col v-if="alert.risiko < 50">
-            <v-btn color="#f4f7fc">
-              HIER KLICKEN
-            </v-btn>
-          </v-col>
-          <v-col v-else-if="alert.risiko >= 50 && alert.risiko < 75">
-            <v-btn color="yellow">
-              HIER KLICKEN
-            </v-btn>
-          </v-col>
-          <v-col v-else-if="alert.risiko >= 75">
-            <v-btn color="red">
-              HIER KLICKEN
-            </v-btn>
-          </v-col>
+      <template>
+        <!-- Data Table -->
+        <v-data-table
+          :headers="headers"
+          :items="desserts"
+          :items-per-page="5"
+          class="elevation-1"
+        >
 
-        </V-item>
-        </v-row>
-      </v-item-group>
-      </div>
+          <!-- Farbe des Risikos -->
+          <template v-slot:item.risiko="{ item }">
+            <v-chip
+              :color="getColor(item.risiko)"
+              dark
+            >
+              {{ item.risiko }}
+            </v-chip>
+          </template>
+          <template v-slot:top>
+            <v-toolbar
+              flat
+            >
+              <v-toolbar-title>Überblick</v-toolbar-title>
+              <v-divider
+                class="mx-4"
+                inset
+                vertical
+              ></v-divider>
+              <v-spacer></v-spacer>
+              <v-dialog
+                v-model="dialog"
+                max-width="500px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    color="primary"
+                    dark
+                    class="mb-2"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    +
+                  </v-btn>
+                </template>
+                <v-card>
+                  <v-card-title>
+                    <span class="text-h5">{{ formTitle }}</span>
+                  </v-card-title>
+                  <v-card-text>
+                    <v-container>
+                      <v-row>
+                        <v-col
+                          cols="12"
+                          sm="6"
+                          md="4"
+                        >
+                          <v-text-field
+                            v-model="editedItem.alertname"
+                            label="Alertname"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          sm="6"
+                          md="4"
+                        >
+                          <v-text-field
+                            v-model="editedItem.zeitpunkt"
+                            label="Zeitpunkt"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          sm="6"
+                          md="4"
+                        >
+                          <v-text-field
+                            v-model="editedItem.risiko"
+                            label="Risiko (%)"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col
+                          cols="12"
+                          sm="6"
+                          md="4"
+                        >
+                          <v-text-field
+                            v-model="editedItem.handlungsbedarf"
+                            label="Handlungsbedarf"
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-container>
+                  </v-card-text>
 
-      <!--PAGINATION-->
-
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="blue darken-1"
+                      text
+                      @click="close"
+                    >
+                      Cancel
+                    </v-btn>
+                    <v-btn
+                      color="blue darken-1"
+                      text
+                      @click="save"
+                    >
+                      Save
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+              <v-dialog v-model="dialogDelete" max-width="500px">
+                <v-card>
+                  <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+                    <v-spacer></v-spacer>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+            </v-toolbar>
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn
+              small
+              class="mr-2"
+              @click="getInformation(item)"
+            >
+              Information
+            </v-btn>
+            <v-icon
+              small
+              class="mr-2"
+              @click="editItem(item)"
+            >
+              mdi-pencil
+            </v-icon>
+            <v-icon
+              small
+              @click="deleteItem(item)"
+            >
+              mdi-delete
+            </v-icon>
+          </template>
+        </v-data-table>
+      </template>
     </v-sheet>
   </div>
 </template>
 
 <script>
-export default {
-  data () {
-    return {
+import Vue from "vue";
+export default Vue.extend({
+	data () {
+		return {
+			headers: [
+				{
+					text: "ALERTNAME",
+					align: "start",
+					sortable: false,
+					value: "alertname",
+				},
+				{ text: "ZEITPUNKT ", value: "zeitpunkt" },
+				{ text: "RISIKO (%)", value: "risiko" },
+				{ text: "HANDLUNGSBEDARF", value: "handlungsbedarf" },
+				{ text: "DETAILS", value: "actions", sortable: false },
+			],
+			desserts: [
+				{
+					alertname: "Frozen Yogurt",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 54,
+				},
+				{
+					alertname: "Ice cream sandwich",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 64,
+				},
+				{
+					alertname: "Eclair",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 91,
+				},
+				{
+					alertname: "Cupcake",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 15,
+				},
+				{
+					alertname: "Gingerbread",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 12,
+				},
+				{
+					alertname: "Jelly bean",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 18,
+				},
+				{
+					alertname: "Lollipop",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 18,
+				},
+				{
+					alertname: "Honeycomb",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 91,
 
+				},
+				{
+					alertname: "Donut",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 11,
+				},
+				{
+					alertname: "KitKat",
+					zeitpunkt: 159,
+					handlungsbedarf: 24,
+					details: 4.0,
+					risiko: 51,
+				},
+			],
+			editedIndex: -1,
+			editedItem: {
+				alertname: "",
+				risiko: 0,
+				handlungsbedarf: 0,
+			},
+			defaultItem: {
+				alertname: "",
+				risiko: 0,
+				handlungsbedarf: 0,
+				carbs: 0,
+				protein: 0,
+			},
 
-      headers: [
-        {
-          text: 'Dessert (100g serving)',
-          align: 'start',
-          sortable: false,
-          value: 'name',
-        },
-        { text: 'Calories', value: 'calories' },
-        { text: 'Fat (g)', value: 'fat' },
-        { text: 'Carbs (g)', value: 'carbs' },
-        { text: 'Protein (g)', value: 'protein' },
-        { text: 'Iron (%)', value: 'iron' },
-      ],
-      alerts: [
-        {
-          name: 'Frozen Yogurt',
-          zeitpunkt: '12:34',
-          risiko: 75,
-          handlungsbedarf: 'Ja',
-        },
-        {
-          name: 'Ice cream sandwich',
-          zeitpunkt: 159,
-          risiko: 6.0,
-          handlungsbedarf: 'Nein',
-        },
-        {
-          name: 'Eclair',
-          zeitpunkt: 159,
-          risiko: 55,
-          handlungsbedarf: 'Nein',
-        },
-        {
-          name: 'Cupcake',
-          zeitpunkt: 159,
-          risiko: 25,
-          handlungsbedarf: 'Nein',
-        },
-        {
-          name: 'Gingerbread',
-          zeitpunkt: 159,
-          risiko: 6.0,
-          handlungsbedarf: 'Nein',
-        },
-        {
-          name: 'Jelly bean',
-          zeitpunkt: 159,
-          risiko: 6.0,
-          handlungsbedarf: 'Nein',
-        },
-        {
-          name: 'Lollipop',
-          zeitpunkt: 159,
-          risiko: 75,
-          handlungsbedarf: 'Ja',
-        },
-        {
-          name: 'Honeycomb',
-          zeitpunkt: 159,
-          risiko: 33,
-          handlungsbedarf: 'Nein',
-        },
-        {
-          name: 'Donut',
-          zeitpunkt: 159,
-          risiko: 22,
-          handlungsbedarf: 'Nein',
-        },
-        {
-          name: 'KitKat',
-          zeitpunkt: 159,
-          risiko: 88,
-          handlungsbedarf: 'Ja',
-        },
-      ],
-    }
+			computed: {
+				formTitle () {
+					return this.editedIndex === -1 ? "New Item" : "Edit Item";
+				},
+			},
 
-  },
-}
+			watch: {
+				dialog (val) {
+					val || this.close();
+				},
+				dialogDelete (val) {
+					val || this.closeDelete();
+				},
+			},
+		};
+	},
+
+	methods: {
+		getColor (risiko) {
+			if (risiko > 75) return "red";
+			else if (risiko > 50) return "orange";
+			else return "green";
+		},
+		editItem (item) {
+			this.editedIndex = this.desserts.indexOf(item);
+			this.editedItem = Object.assign({}, item);
+			this.dialog = true;
+		},
+
+		getInformation(item) {
+			this.editedIndex = this.desserts.indexOf(item);
+			this.editedItem = Object.assign({}, item);
+		},
+
+		deleteItem (item) {
+			this.editedIndex = this.desserts.indexOf(item);
+			this.editedItem = Object.assign({}, item);
+			this.dialogDelete = true;
+		},
+
+		deleteItemConfirm () {
+			this.desserts.splice(this.editedIndex, 1);
+			this.closeDelete();
+		},
+
+		close () {
+			this.dialog = false;
+			this.$nextTick(() => {
+				this.editedItem = Object.assign({}, this.defaultItem);
+				this.editedIndex = -1;
+			});
+		},
+
+		closeDelete () {
+			this.dialogDelete = false;
+			this.$nextTick(() => {
+				this.editedItem = Object.assign({}, this.defaultItem);
+				this.editedIndex = -1;
+			});
+		},
+
+		save () {
+			if (this.editedIndex > -1) {
+				Object.assign(this.desserts[this.editedIndex], this.editedItem);
+			} else {
+				this.desserts.push(this.editedItem);
+			}
+			this.close();
+		},
+	},
+});
 </script>
 
 <style scoped>
-#alert-list-header{
-  background-color: #f4f7fc;
-  border-radius: 6px;
-  font-size: x-large;
-}
-.alert-item {
-  padding: 10px;
-}
-#aler-list-sheet {
-  border-radius: 6px;
-}
+
 
 </style>
