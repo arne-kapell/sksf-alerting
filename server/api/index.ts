@@ -4,6 +4,7 @@ import { hash, compare } from "bcrypt";
 import { sign, verify } from "jsonwebtoken";
 import * as portUsed from "tcp-port-used";
 import * as m from "../db/models";
+import axios, { AxiosBasicCredentials, AxiosError } from "axios";
 const app = express();
 let io: Server | null = null;
 
@@ -12,7 +13,7 @@ app.all("/tinf20cs1", (req, res) => {
 	res.json({ secret: "SECURITY!!!" });
 });
 
-// sync database
+// Sync database
 const syncOptions = {
 	alter: process.env.NODE_ENV === "development"
 };
@@ -158,7 +159,29 @@ app.get("/user-info", expressAuth, async (req, res) => {
 	});
 });
 
-// realtime alarm endpoint
+// Helper function to notify ui via socket.io and passengers via information system api about new alarms
+const notify = async (alarm: Alarm) => {
+	io?.emit("alarm");
+	try {
+		await axios.post("http://asm.fl.dlr.de:10001/terminal", {
+			messages: [
+				{
+					level: "info",
+					message: alarm.message
+				}
+			]
+		}, {
+			auth: {
+				username: "tinf19cs",
+				password: "$sse1%8Dh2bw"
+			} as AxiosBasicCredentials
+		});
+	} catch (e) {
+		console.error("Error sending alarm to 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+	}
+};
+
+// Realtime alarm endpoint
 app.post("/realtime-alarm", async (req, res) => {
 	const mapAlarm = (a: Alarm) => {
 		return {
@@ -177,11 +200,11 @@ app.post("/realtime-alarm", async (req, res) => {
 	} else {
 		uid = (await m.Alarm.create(mapAlarm(alarm))).get("uid");
 	}
-	io?.emit("alarm");
 	res.json({ success: true, uid: uid });
+	notify(alarm);
 });
 
-// alarm endpoint for ui
+// Alarm endpoint for ui
 app.get("/alarms", expressAuth, async (req, res) => {
 	const alarms = await m.Alarm.findAll({
 		order: [["updatedAt", "DESC"]],
@@ -200,7 +223,7 @@ app.get("/alarms", expressAuth, async (req, res) => {
 	});
 });
 
-// endpoint for high-level passenger information
+// Endpoint for high-level passenger information
 app.get("/passenger/information", async (req, res) => {
 	const alarms = await m.Alarm.findAll({
 		order: [["updatedAt", "DESC"]],
