@@ -52,66 +52,66 @@
 
 <script>
 export default {
-  data () {
-    return {
-      alerts: [
-        {
-          vorschlaege: 'Frozen Yogurt',
-          werkzeug: '12:34',
-          erledigt: 75,
-        },
-        {
-          vorschlaege: 'Ice cream sandwich',
-          werkzeug: 159,
-          erledigt: 6.0,
-        },
-        {
-          vorschlaege: 'Eclair',
-          werkzeug: 159,
-          erledigt: 55,
-        },
-        {
-          vorschlaege: 'Cupcake',
-          werkzeug: 159,
-          erledigt: 25,
-        },
-        {
-          vorschlaege: 'Gingerbread',
-          werkzeug: 159,
-          erledigt: 6.0,
-        },
-        {
-          vorschlaege: 'Jelly bean',
-          werkzeug: 159,
-          erledigt: 6.0,
-        },
-        {
-          vorschlaege: 'Lollipop',
-          werkzeug: 159,
-          erledigt: 75,
-        },
-        {
-          vorschlaege: 'Honeycomb',
-          werkzeug: 159,
-          erledigt: 33,
-        },
-        {
-          vorschlaege: 'Donut',
-          werkzeug: 159,
-          erledigt: 22,
-        },
-        {
-          vorschlaege: 'KitKat',
-          werkzeug: 159,
-          erledigt: 88,
-        },
-      ],
-        checkbox1: true,
-        checkbox2: false,
-    }
+	data () {
+		return {
+			alerts: [
+				{
+					vorschlaege: "Frozen Yogurt",
+					werkzeug: "12:34",
+					erledigt: 75,
+				},
+				{
+					vorschlaege: "Ice cream sandwich",
+					werkzeug: 159,
+					erledigt: 6.0,
+				},
+				{
+					vorschlaege: "Eclair",
+					werkzeug: 159,
+					erledigt: 55,
+				},
+				{
+					vorschlaege: "Cupcake",
+					werkzeug: 159,
+					erledigt: 25,
+				},
+				{
+					vorschlaege: "Gingerbread",
+					werkzeug: 159,
+					erledigt: 6.0,
+				},
+				{
+					vorschlaege: "Jelly bean",
+					werkzeug: 159,
+					erledigt: 6.0,
+				},
+				{
+					vorschlaege: "Lollipop",
+					werkzeug: 159,
+					erledigt: 75,
+				},
+				{
+					vorschlaege: "Honeycomb",
+					werkzeug: 159,
+					erledigt: 33,
+				},
+				{
+					vorschlaege: "Donut",
+					werkzeug: 159,
+					erledigt: 22,
+				},
+				{
+					vorschlaege: "KitKat",
+					werkzeug: 159,
+					erledigt: 88,
+				},
+			],
+			checkbox1: true,
+			checkbox2: false,
+		};
 
-  },
-}
+	},
+};
 </script>
 
 <style scoped>

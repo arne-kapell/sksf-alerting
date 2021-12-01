@@ -1,8 +1,6 @@
 <template>
-  
-    <v-navigation-drawer v-model="drawer" temporary height="100%" width="12%" >
-
-     <v-divider></v-divider>
+  <v-navigation-drawer permanent height="100%"  mobile-breakpoint="">
+    <v-divider></v-divider>
       <v-list >
         <v-list-item-group v-model="selectedItem"  color="primary">
           <v-list-item
@@ -21,9 +19,7 @@
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
-
 </template>
-
 
 <script>
 export default {
