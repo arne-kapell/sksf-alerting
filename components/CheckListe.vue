@@ -1,117 +1,104 @@
 <template>
-  <div class="v-container">
-    <v-sheet
-    id="aler-list-sheet"
-    color="white"
-    elevation="5"
-    >
-      <div class="v-container" id="aktion-list-header">
-        <v-row>
-      <!--TABLE HEADER-->
-          <v-col>
-            AKTIONSVORSCHLÄGE
-          </v-col>
-          <v-col>
-            WERKZEUG
-          </v-col>
-          <v-col>
-           ERLEDIGT
-          </v-col>
-       </v-row>
-      </div>
-      <!--ITEMS EINFÜGEN-->
-      <div class="v-container">
-      <v-item-group v-for="(aktion, index) in alerts" :key ="aktion + index">
-        <v-row>
-        <V-item class="aktion-item">
-          <v-col>
-            {{aktion.vorschlaege}}
-          </v-col>
-          <v-col>
-            {{ aktion.werkzeug }}
-          </v-col>
-          <v-col>
-             {{ aktion.erledigt }}
-          </v-col>
-          <v-col>
-               <v-checkbox
-                   v-model="checkbox2"
-                  :label="`Checkbox 2: ${checkbox2.toString()}`"
-              ></v-checkbox>
-          </v-col>
-        </V-item>
-        </v-row>
-      </v-item-group>
-      </div>
+	<v-data-table
+	:headers="headers"
+	:items="alerts"
+	:items-per-page="5"
+	class="elevation-1"
+	>
+	<template v-slot:top>
+		<v-toolbar
+			flat
+		>
+        <v-toolbar-title>Kriesenwerkzeuge</v-toolbar-title>	
+        <v-divider
+          class="mx-4"
+          inset
+          vertical
+        ></v-divider>
+		</v-toolbar>
+	</template>
+	<template v-slot:item.erledigt="{item}">
+		<v-container
+		class="px-0"
+		fluid
+		>
+			<v-checkbox
+			></v-checkbox>
+		</v-container>
+	</template>
 
-      <!--PAGINATION-->
-
-    </v-sheet>
-  </div>
+	</v-data-table>
 </template>
 
 <script>
 export default {
-  data () {
-    return {
-      alerts: [
-        {
-          vorschlaege: 'Frozen Yogurt',
-          werkzeug: '12:34',
-          erledigt: 75,
-        },
-        {
-          vorschlaege: 'Ice cream sandwich',
-          werkzeug: 159,
-          erledigt: 6.0,
-        },
-        {
-          vorschlaege: 'Eclair',
-          werkzeug: 159,
-          erledigt: 55,
-        },
-        {
-          vorschlaege: 'Cupcake',
-          werkzeug: 159,
-          erledigt: 25,
-        },
-        {
-          vorschlaege: 'Gingerbread',
-          werkzeug: 159,
-          erledigt: 6.0,
-        },
-        {
-          vorschlaege: 'Jelly bean',
-          werkzeug: 159,
-          erledigt: 6.0,
-        },
-        {
-          vorschlaege: 'Lollipop',
-          werkzeug: 159,
-          erledigt: 75,
-        },
-        {
-          vorschlaege: 'Honeycomb',
-          werkzeug: 159,
-          erledigt: 33,
-        },
-        {
-          vorschlaege: 'Donut',
-          werkzeug: 159,
-          erledigt: 22,
-        },
-        {
-          vorschlaege: 'KitKat',
-          werkzeug: 159,
-          erledigt: 88,
-        },
-      ],
-        checkbox1: true,
-        checkbox2: false,
-    }
+	data () {
+		return {
+			headers: [
+				{
+					text: "AKTIONSVORSCHLÄGE",
+					align: "start",
+					value: "vorschlaege",
+				},
+				{ text: "WERKZEUGE", value: "werkzeug" },
+				{ text: "ERLEDIGT", value: "erledigt" },
+			],
+			alerts: [
+				{
+					vorschlaege: "Frozen Yogurt",
+					werkzeug: 158,
+					erledigt: true,
+				},
+				{
+					vorschlaege: "Ice cream sandwich",
+					werkzeug: 159,
+					erledigt: false,
+				},
+				{
+					vorschlaege: "Eclair",
+					werkzeug: 159,
+					erledigt: false,
+				},
+				{
+					vorschlaege: "Cupcake",
+					werkzeug: 159,
+					erledigt: false,
+				},
+				{
+					vorschlaege: "Gingerbread",
+					werkzeug: 159,
+					erledigt: false,
+				},
+				{
+					vorschlaege: "Jelly bean",
+					werkzeug: 159,
+					erledigt: false,
+				},
+				{
+					vorschlaege: "Lollipop",
+					werkzeug: 159,
+					erledigt: false,
+				},
+				{
+					vorschlaege: "Honeycomb",
+					werkzeug: 159,
+					erledigt: false,
+				},
+				{
+					vorschlaege: "Donut",
+					werkzeug: 159,
+					erledigt: false,
+				},
+				{
+					vorschlaege: "KitKat",
+					werkzeug: 159,
+					erledigt: false,
+				},
+			],
+		};
 
-  },
-}
+	},
+};
 </script>
 
 <style scoped>

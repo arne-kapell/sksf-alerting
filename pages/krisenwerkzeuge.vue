@@ -1,6 +1,7 @@
 <template>
-<div class="krisenwerkzeuge">
-    Hiiiiii
-</div>
-</template>    
+  <div id="root" >
+    <check-liste/>
+  </div> 
+
+
 
