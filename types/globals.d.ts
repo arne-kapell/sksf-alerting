@@ -15,10 +15,9 @@ declare type Checklist = {
 
 declare type Alarm = {
     uid: number,
-    category: AlarmCategory,
     risk: number,
     source: string,
-    checklist?: Checklist,
+    checklistId: number,
     message: string
 }
 

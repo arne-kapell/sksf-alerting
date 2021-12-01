@@ -16,13 +16,38 @@
 
 <script lang="ts">
 import Vue from "vue";
+import type { NuxtSocket, NuxtSocketOpts } from "nuxt-socket-io";
+import { TokenableScheme } from "@nuxtjs/auth-next";
 export default Vue.extend({
-	// middleware: "auth",
+	middleware: "auth",
 	layout: "main",
 	data() {
 		return {
-			light: true
+			light: true,
+			socket: null as NuxtSocket | null,
+			socketStatus: {}
 		};
+	},
+	mounted() {
+		const token = (this.$auth.strategy as TokenableScheme).token.get();
+		this.socket = this.$nuxtSocket({
+			path: "/socket.io",
+			extraHeaders: {
+				Authorization: token
+			}
+		} as NuxtSocketOpts);
+		this.$store.dispatch("getAlarms");
+	},
+	asyncData: async (ctx) => {
+		return {
+			user: await ctx.store.dispatch("auth/getUser")
+		};
+	},
+	methods: {
+		async getUserInfo() {
+			const info = await this.$axios.$get("/user-info");
+			console.log(info);
+		}
 	}
 });
 </script>

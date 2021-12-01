@@ -5,7 +5,8 @@ const db = new Sequelize(dbConfig.DB as string, dbConfig.USER as string, dbConfi
 	host: dbConfig.HOST,
 	dialect: dbConfig.dialect as Dialect,
 	operatorsAliases: undefined,
-	pool: dbConfig.pool
+	pool: dbConfig.pool,
+	logging: false
 });
 
 // const db = {
