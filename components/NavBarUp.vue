@@ -1,72 +1,35 @@
 <template>
   <nav>
-    <v-app-bar  color="red" dark app>
-      <v-app-bar-nav-icon class="grey--text" @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title class="text--center grey--text">
+    <v-app-bar  color="warning" dark app>     
+      <v-toolbar-title class="text--center ">
         <span>Projekt</span>
       </v-toolbar-title>
       <v-spacer> </v-spacer>
- <v-btn color="grey" to="/login">
-        <span>Logout</span>
-      </v-btn>
-    </v-toolbar>
+ <v-btn @click="logout()">Logout</v-btn>    
      <v-btn color="warning" fab dark>
               <v-icon>mdi-account</v-icon>
-            </v-btn> 
+    </v-btn> 
     </v-app-bar> 
-<!-- 
-    <v-navigation-drawer v-model="drawer" fixed app color="orange darker-2" dark>
-      <v-list>
-          <v-list-item-group>
-          <v-list-item to="">
-            <v-list-item-action >
-              <v-icon>mdi-home</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title>Dashboard</v-list-item-title>
-            </v-list-item-content>   
-          </v-list-item>
-          <v-list-item link>
-            <v-list-item-action>
-              <v-icon>mdi-view-list</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title>Checkliste-Bearbeitung</v-list-item-title>
-            </v-list-item-content>   
-          </v-list-item>
-            <v-list-item to="">
-            <v-list-item-action>
-              <v-icon>mdi-wrench</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title>Krisenwerkzeuge</v-list-item-title>
-            </v-list-item-content>   
-          </v-list-item>
-            <v-list-item link>
-            <v-list-item-action>
-              <v-icon>mdi-account-details</v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-              <v-list-item-title>Account</v-list-item-title>
-            </v-list-item-content>   
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
-    </v-navigation-drawer>
--->
+
+ 
 </nav>  
 </template>
 
-<script lang="ts>
-  export default {
-      name:"NavBarUp",
-      data(){
-          return{
-              drawer: true
-          }
-      }
-  }
+<script lang="ts">
+import Vue from "vue";
+export default Vue.extend({
+	middleware: "auth",
+	layout: "main",
+	data() {
+		return {
+			dark: true,
+		};
+	},
+	methods: {
+    async logout(){
+      await this.$auth.logout();
+      this.$router.push("/login");
+    },		
+	}
+});
 </script>
-<style>
-
-</style>
