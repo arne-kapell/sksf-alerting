@@ -37,17 +37,6 @@ export default Vue.extend({
 			}
 		} as NuxtSocketOpts);
 		this.$store.dispatch("getAlarms");
-	},
-	asyncData: async (ctx) => {
-		return {
-			user: await ctx.store.dispatch("auth/getUser")
-		};
-	},
-	methods: {
-		async getUserInfo() {
-			const info = await this.$axios.$get("/user-info");
-			console.log(info);
-		}
 	}
 });
 </script>
