@@ -102,16 +102,6 @@ export default {
 </script>
 
 <style scoped>
-#aktion-list-header{
-  background-color: #f4f7fc;
-  border-radius: 6px;
-  font-size: x-large;
-}
-.aktion-item {
-  padding: 10px;
-}
-#aler-list-sheet {
-  border-radius: 6px;
-}
+
 
 </style>
