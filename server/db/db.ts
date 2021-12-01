@@ -1,7 +1,7 @@
 import * as dbConfig from "./db.config";
 import { Dialect, Sequelize } from "sequelize";
 
-const db = new Sequelize(dbConfig.DB as string, dbConfig.USER as string, "vcq^ZR^oU3W2%#", {
+const db = new Sequelize(dbConfig.DB as string, dbConfig.USER as string, dbConfig.PASSWORD, {
 	host: dbConfig.HOST,
 	dialect: dbConfig.dialect as Dialect,
 	operatorsAliases: undefined,
