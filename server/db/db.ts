@@ -1,11 +1,12 @@
 import * as dbConfig from "./db.config";
 import { Dialect, Sequelize } from "sequelize";
 
-const db = new Sequelize(dbConfig.DB as string, dbConfig.USER as string, dbConfig.PASSWORD, {
+const db = new Sequelize(dbConfig.DB as string, dbConfig.USER as string, "vcq^ZR^oU3W2%#", {
 	host: dbConfig.HOST,
 	dialect: dbConfig.dialect as Dialect,
 	operatorsAliases: undefined,
-	pool: dbConfig.pool
+	pool: dbConfig.pool,
+	logging: false
 });
 
 // const db = {

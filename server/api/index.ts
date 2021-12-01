@@ -20,6 +20,7 @@ m.User.sync(syncOptions);
 m.Action.sync(syncOptions);
 m.Checklist.sync(syncOptions);
 m.Alarm.sync(syncOptions);
+m.ChecklistAction.sync(syncOptions);
 
 // Authentication middlewares
 const tokenSecret = process.env.JWT_SECRET || "secret_sks-f";
@@ -29,10 +30,10 @@ const auth: (token: string) => Promise<boolean | User> = async (token) => {
 		const user = await m.User.findByPk(decoded.uid);
 		if (user) {
 			return {
-				uid: user.uid,
-				mail: user.mail,
-				name: user.name,
-				privileged: user.privileged
+				uid: user.get("uid"),
+				mail: user.get("mail"),
+				name: user.get("name"),
+				privileged: user.get("privileged")
 			} as User;
 		} else {
 			return false;
@@ -106,14 +107,14 @@ app.use(async (req, res, next) => {
 app.post("/login", async (req, res) => {
 	const { mail, password } = req.body;
 	const user = await m.User.findOne({ where: { mail } });
-	const isValid = user && await compare(password, user.pwdHash);
+	const isValid = user && await compare(password, user.get("pwdHash"));
 	if (isValid) {
 		res.json({
 			token: sign({
-				uid: user?.uid,
-				name: user?.name,
-				mail: user?.mail,
-				privileged: user?.privileged,
+				uid: user?.get("uid"),
+				name: user?.get("name"),
+				mail: user?.get("mail"),
+				privileged: user?.get("privileged"),
 			}, tokenSecret, { expiresIn: "1h" })
 		});
 	} else {
@@ -136,10 +137,10 @@ app.post("/register", async (req, res) => {
 		});
 		res.json({
 			token: sign({
-				uid: newUser.uid,
-				name: newUser.name,
-				mail: newUser.mail,
-				privileged: newUser.privileged,
+				uid: newUser?.get("uid"),
+				name: newUser?.get("name"),
+				mail: newUser?.get("mail"),
+				privileged: newUser?.get("privileged"),
 			}, tokenSecret, { expiresIn: "1h" })
 		});
 	}
@@ -161,58 +162,60 @@ app.get("/user-info", expressAuth, async (req, res) => {
 app.post("/realtime-alarm", async (req, res) => {
 	const mapAlarm = (a: Alarm) => {
 		return {
-			uid: a.uid,
-			category: a.category,
 			risk: a.risk,
 			source: a.source,
-			checklistId: a.checklist?.uid,
-		};
+			message: a.message,
+			checklistId: a.checklistId
+		} as m.AlarmInput;
 	};
 	
 	const { alarm } = req.body;
-	const existing = await m.Alarm.findOne({ where: { uid: alarm.uid } }) as m.AlarmSourceChecklist;
+	const existing = await m.Alarm.findOne({ where: { uid: alarm.uid } });
+	let uid: number | boolean = false;
 	if (existing) {
-		console.log();
-		// existing.update(mapAlarm(existing));
+		uid = (await existing.update(mapAlarm(alarm))).get("uid");
 	} else {
-		if (alarm.checklist) {
-			const checklist = await m.Checklist.findOrCreate({ where: { uid: alarm.checklist.uid } }) as unknown as m.Checklist;
-			checklist.update(alarm.checklist as Checklist);
-		}
-
-		m.Alarm.create(mapAlarm(alarm));
+		uid = (await m.Alarm.create(mapAlarm(alarm))).get("uid");
 	}
 	io?.emit("alarm");
-	res.json({ success: true });
+	res.json({ success: true, uid: uid });
 });
 
 // alarm endpoint for ui
 app.get("/alarms", expressAuth, async (req, res) => {
 	const alarms = await m.Alarm.findAll({
-		order: [["datetime", "DESC"]],
+		order: [["updatedAt", "DESC"]],
 		limit: 100
 	});
+	console.log(alarms);
 	res.json({
-		alarms: alarms
+		alarms: alarms.map((a) => ({
+			uid: a.get("uid"),
+			risk: a.get("risk"),
+			source: a.get("source"),
+			message: a.get("message"),
+			checklistId: a.get("checklistId"),
+			datetime: a.get("updatedAt")
+		}))
 	});
 });
 
 // endpoint for high-level passenger information
 app.get("/passenger/information", async (req, res) => {
 	const alarms = await m.Alarm.findAll({
-		order: [["datetime", "DESC"]],
+		order: [["updatedAt", "DESC"]],
 		limit: 100
 	}) as m.AlarmSourceChecklist[];
 	res.json({
 		count: alarms.length,
 		alarms: alarms.map(a => {
-			const date = new Date(a.updatedAt);
+			const date = new Date(a.get("updatedAt"));
 			const diff = Math.abs(date.getTime() - new Date().getTime());
 			const diffMinutes = Math.floor((diff / 1000) / 60);
 			return {
 				since: (diffMinutes > 0) ? diffMinutes + " minutes" : "just now",
-				risk: a.risk,
-				system: a.name
+				risk: a.get("risk"),
+				system: a.get("source")
 			};
 		})
 	});

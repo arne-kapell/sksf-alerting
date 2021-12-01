@@ -80,13 +80,12 @@ interface ChecklistAttributes {
 	uid: number;
 	name: string;
 	category: string;
-	actionIds: string;
 	progress: number;
 
 	createdAt?: Date;
 	updatedAt?: Date;
 }
-export type ChecklistInput = Optional<ChecklistAttributes, "name" | "category" | "actionIds" | "progress">
+export type ChecklistInput = Optional<ChecklistAttributes, "name" | "category" | "progress">
 export type ChecklistOuput = Required<ChecklistAttributes>
 export class Checklist extends Model<ChecklistAttributes, ChecklistInput> implements ChecklistAttributes {
 	uid!: number;
@@ -110,9 +109,6 @@ Checklist.init({
 	category: {
 		type: DataTypes.STRING
 	},
-	actionIds: {
-		type: DataTypes.STRING
-	},
 	progress: {
 		type: DataTypes.INTEGER
 	}
@@ -123,24 +119,22 @@ Checklist.init({
 
 interface AlarmAttributes {
 	uid: number;
-	category: string;
 	checklistId: number;
 	source: string;
+	message: string;
 	risk: number;
-	active: boolean;
 
 	createdAt?: Date;
 	updatedAt?: Date;
 }
-export type AlarmInput = Optional<AlarmAttributes, "category" | "checklistId" | "source" | "risk" | "active">
+export type AlarmInput = Optional<AlarmAttributes, "uid" | "checklistId" | "source" | "risk" | "message">
 export type AlarmOuput = Required<AlarmAttributes>
 export class Alarm extends Model<AlarmAttributes, AlarmInput> implements AlarmAttributes {
 	uid!: number;
-	category!: string;
 	checklistId!: number;
 	source!: string;
+	message!: string;
 	risk!: number;
-	active!: boolean;
 
 	createdAt!: Date;
 	updatedAt!: Date;
@@ -151,24 +145,52 @@ Alarm.init({
 		primaryKey: true,
 		autoIncrement: true
 	},
-	category: {
-		type: DataTypes.STRING
-	},
 	risk: {
-		type: DataTypes.INTEGER
+		type: DataTypes.INTEGER,
+		defaultValue: 0
+	},
+	message: {
+		type: DataTypes.STRING
 	},
 	source: {
 		type: DataTypes.STRING
 	},
 	checklistId: {
 		type: DataTypes.INTEGER
-	},
-	active: {
-		type: DataTypes.BOOLEAN,
-		defaultValue: true
 	}
 }, {
 	timestamps: true,
+	sequelize: db
+});
+
+interface ChecklistActionAttributes {
+	uid: number;
+	checklistId: number;
+	actionId: number;
+}
+export type ChecklistActionInput = Optional<ChecklistActionAttributes, "checklistId" | "actionId">
+export type ChecklistActionOuput = Required<ChecklistActionAttributes>
+export class ChecklistAction extends Model<ChecklistActionAttributes, ChecklistActionInput> implements ChecklistActionAttributes {
+	uid!: number;
+	checklistId!: number;
+	actionId!: number;
+}
+ChecklistAction.init({
+	uid: {
+		type: DataTypes.INTEGER,
+		primaryKey: true,
+		autoIncrement: true
+	},
+	checklistId: {
+		type: DataTypes.INTEGER,
+		allowNull: false	
+	},
+	actionId: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	}
+}, {
+	timestamps: false,
 	sequelize: db
 });
 
@@ -179,4 +201,13 @@ Alarm.belongsTo(Checklist, {
 Checklist.hasMany(Alarm, {
 	foreignKey: "checklistId"
 });
+Checklist.belongsToMany(Action, {
+	through: ChecklistAction,
+	foreignKey: "checklistId"
+});
+Action.belongsToMany(Checklist, {
+	through: ChecklistAction,
+	foreignKey: "actionId"
+});
 export type AlarmSourceChecklist = Required<Alarm> & Required<Checklist>;
+export type ChecklistActionType = Required<Checklist> & Required<Action>;
