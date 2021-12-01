@@ -1,12 +1,9 @@
 <template>
-  <v-app dark>
+  <v-app>
     <v-toolbar
       color="primary"
-      dark
-      app
+      light
       fixed
-      clipped-left
-      clipped-right
       clipped-bottom />
     <Nuxt />
     <v-footer

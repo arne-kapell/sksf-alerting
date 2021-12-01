@@ -3,7 +3,7 @@
     <v-app>
       <v-container class="main-page container--fluid">
         <NavBarUp/>
-        <v-col class="col-2" id="menu-side">
+        <v-col class="col-2" >
           <MenuSide/>
         </v-col>
         <v-col class="col-7 offset-1">
@@ -23,7 +23,7 @@ export default Vue.extend({
 	layout: "main",
 	data() {
 		return {
-			dark: true,
+			light: true,
 			socket: null as NuxtSocket | null,
 			socketStatus: {}
 		};
