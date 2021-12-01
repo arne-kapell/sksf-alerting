@@ -1,18 +1,17 @@
 <template>
   <nav>
-    <v-app-bar  color="red" dark app>
-      <v-app-bar-nav-icon class="grey--text" @click="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title class="text--center grey--text">
+    <v-app-bar  color=primary light app>
+      <!-- <v-app-bar-nav-icon class="grey--text" @click="drawer = !drawer"></v-app-bar-nav-icon> -->
+      <v-toolbar-title class="text--center" >
         <span>Projekt</span>
       </v-toolbar-title>
       <v-spacer> </v-spacer>
- <v-btn color="grey" to="/login">
+    <v-btn color="accent" to="/login" padding="3px" id="NavBarBtn">
         <span>Logout</span>
       </v-btn>
-    </v-toolbar>
-     <v-btn color="warning" fab dark>
-              <v-icon>mdi-account</v-icon>
-            </v-btn> 
+     <v-btn color="warning" fab light id="NavBarBtn">
+          <v-icon >mdi-account</v-icon>
+      </v-btn> 
     </v-app-bar> 
 <!-- 
     <v-navigation-drawer v-model="drawer" fixed app color="orange darker-2" dark>
@@ -57,7 +56,7 @@
 </nav>  
 </template>
 
-<script lang="ts>
+<script lang="ts">
   export default {
       name:"NavBarUp",
       data(){
@@ -68,5 +67,16 @@
   }
 </script>
 <style>
-
+  #NavBarBtn{
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  #accIcon{
+    width: 5px ;
+  }
+  .v-toolbar-title{
+    font-weight: 400;
+    font-size:  3rem;
+    color: 'accent';
+  }
 </style>

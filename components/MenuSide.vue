@@ -2,7 +2,7 @@
   <v-navigation-drawer permanent height="100%"  mobile-breakpoint="">
     <v-divider></v-divider>
       <v-list >
-        <v-list-item-group v-model="selectedItem"  color="primary">
+        <v-list-item-group v-model="selectedItem"  color="accent">
           <v-list-item
             v-for="(item, i) in items"
             :key="i"
@@ -37,7 +37,7 @@ export default {
       {
         text: "Checkliste",
         icon: "mdi-email",
-        href: "./components/CheckListe",
+        href: "./krisenwerkzeuge",
       },
       { text: "Account", icon: "mdi-account-box" },
     ],
