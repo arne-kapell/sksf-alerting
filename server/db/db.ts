@@ -9,16 +9,4 @@ const db = new Sequelize(dbConfig.DB as string, dbConfig.USER as string, dbConfi
 	logging: false
 });
 
-// const db = {
-// 	Sequelize: Sequelize,
-// 	sequelize: seq,
-// 	role: models.role(seq, Sequelize),
-// 	user: models.user(seq, Sequelize),
-// 	action: models.action(seq, Sequelize),
-// 	source: models.source(seq, Sequelize),
-// 	checklist: models.checklist(seq, Sequelize),
-// 	alarm: models.alarm(seq, Sequelize)
-// };
-
-
 export default db;

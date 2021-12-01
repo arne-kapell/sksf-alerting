@@ -34,9 +34,7 @@ const config: NuxtConfig = {
 			local: {
 				token: {
 					property: "token",
-					global: true,
-				// required: true,
-				// type: 'Bearer'
+					global: true
 				},
 				user: {
 					property: "user",
