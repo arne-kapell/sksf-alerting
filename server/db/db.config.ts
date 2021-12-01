@@ -1,7 +1,7 @@
 const HOST = "195.62.33.39";
 const USER = "ui";
 const PASSWORD = process.env.DB_PASSWORD;
-const DB = "fksf"; // change!!
+const DB = "ui_db";
 const dialect = "mysql";
 const pool = {
 	max: 5,
