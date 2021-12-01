@@ -51,7 +51,7 @@ export default Vue.extend({
 						password: this.form.password
 					}
 				});
-				this.$router.push({name: "dashboard"});
+				this.$router.push("/");
 			} catch (e) {
 				const message = (e as ErrorEvent).message.split(" ");
 				this.error = message[message.length - 1];

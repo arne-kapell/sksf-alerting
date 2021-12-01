@@ -16,9 +16,8 @@
 
 <script lang="ts">
 import Vue from "vue";
-import MenuSide from "~/components/MenuSide.vue";
 export default Vue.extend({
-	components: {MenuSide},
+	// middleware: "auth",
 	layout: "main",
 	data() {
 		return {
