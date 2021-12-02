@@ -163,14 +163,11 @@ app.get("/user-info", expressAuth, async (req, res) => {
 const notify = async (alarm: Alarm) => {
 	io?.emit("alarm");
 	try {
-		await axios.post("http://asm.fl.dlr.de:10001/terminal", {
-			messages: [
-				{
-					level: "info",
-					message: alarm.message
-				}
-			]
-		}, {
+		await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
+			level: (alarm.risk <= 50) ? "info" : "warning",
+			message: alarm.message
+		}], {
+			withCredentials: true,
 			auth: {
 				username: "tinf19cs",
 				password: "$sse1%8Dh2bw"
