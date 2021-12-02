@@ -4,10 +4,10 @@
         <span>{{ title }}</span>
       </v-toolbar-title>
       <v-spacer />
-       {{currentUser.name}}
     <v-btn @click="logout()" color="accent" id="NavBarBtn">
         <span>Logout</span>
-      </v-btn>     
+      </v-btn>
+       {{currentUser.name}}
       
 </nav>  
 </template>
