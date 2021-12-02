@@ -8,15 +8,18 @@
         <span>Logout</span>
       </v-btn>
      <v-btn text color="warning" fab light id="NavBarBtn">
-          <span > Username</span>
+          <v-icon left > mdi-account </v-icon>
+          <span v-for="user in User" :key="user.uid" >mail: {{user.mail}}</span>
           
       </v-btn>
 </nav>  
 </template>
 
 <script lang="ts">
+import { mapGetters, mapActions} from "vuex";
 import Vue from "vue";
 export default Vue.extend({
+  components: {},
 	data() {
 		return {
 			title: "SKS-F",
@@ -28,9 +31,11 @@ export default Vue.extend({
 			this.$router.push("/login");
 		},		
 	},
-  mounted(){
-    console.log(this.$auth.user);
-  }
+  computed:{
+    user(): User[]{
+      return this.$store.state.user;
+    },
+  },
 });
 </script>
 
