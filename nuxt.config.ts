@@ -4,13 +4,12 @@ import { NuxtConfig } from "@nuxt/types";
 const config: NuxtConfig = {
 	// Global page headers: https://go.nuxtjs.dev/config-head
 	head: {
-		titleTemplate: "%s - sksf-alerting",
-		title: "sksf-alerting",
+		titleTemplate: "%s - SKS-F",
+		title: "*mysterious*",
 		meta: [
 			{ charset: "utf-8" },
 			{ name: "viewport", content: "width=device-width, initial-scale=1" },
-			{ hid: "description", name: "description", content: "" },
-			{ name: "format-detection", content: "telephone=no" }
+			{ hid: "description", name: "description", content: "Sicherheitskoordinationssystem für den Flugbetrieb" }
 		],
 		link: [
 			{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }
@@ -104,7 +103,8 @@ const config: NuxtConfig = {
 	vuetify: {
 		customVariables: ["~/assets/variables.scss"],
 		theme: {
-			light: true,
+			light: false,
+			default: "dark",
 			themes: {
 				dark: {
 					primary: colors.blue.darken2,

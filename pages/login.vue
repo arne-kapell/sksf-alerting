@@ -23,6 +23,11 @@
 import Vue from "vue";
 export default Vue.extend({
 	layout: "main",
+	head() {
+		return {
+			title: "Login",
+		};
+	},
 	data() {
 		return {
 			loading: false,

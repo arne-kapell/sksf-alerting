@@ -17,6 +17,11 @@ import { TokenableScheme } from "@nuxtjs/auth-next";
 export default Vue.extend({
 	middleware: "auth",
 	layout: "main",
+	head() {
+		return {
+			title: "Dashboard",
+		};
+	},
 	data() {
 		return {
 			light: true,
