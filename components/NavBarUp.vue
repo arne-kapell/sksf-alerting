@@ -9,7 +9,7 @@
       </v-btn>
      <v-btn text color="warning" fab light id="NavBarBtn">
           <span > Username</span>
-          <v-icon left>mdi-account</v-icon>
+          
       </v-btn>
 </nav>  
 </template>
