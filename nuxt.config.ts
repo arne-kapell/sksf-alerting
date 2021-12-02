@@ -105,6 +105,7 @@ const config: NuxtConfig = {
 		theme: {
 			light: false,
 			default: "dark",
+			// maybe use theme generator: https://theme-generator.vuetifyjs.com/
 			themes: {
 				dark: {
 					primary: colors.blue.darken2,
@@ -124,7 +125,13 @@ const config: NuxtConfig = {
 					error: "#cd424f",
 					success: colors.green.accent3
 				}
-			}
+			},
+			options: {
+				themeCache: {
+					get: (key: string) => localStorage.getItem(key),
+					set: (key: string, value: string) => localStorage.setItem(key, value),
+				},
+			},
 		}
 	},
 
