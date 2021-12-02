@@ -1,7 +1,7 @@
 <template>
   <nav class="d-flex flex-grow-1 align-center">
       <v-toolbar-title class="text--center" >
-        <span>Projekt</span>
+        <span>{{ title }}</span>
       </v-toolbar-title>
       <v-spacer />
     <v-btn @click="logout()" color="accent" id="NavBarBtn">
@@ -18,7 +18,7 @@ import Vue from "vue";
 export default Vue.extend({
 	data() {
 		return {
-			light: true,
+			title: "SKS-F",
 		};
 	},
 	methods: {
