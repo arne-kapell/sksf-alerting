@@ -7,31 +7,26 @@
     <v-btn @click="logout()" color="accent" id="NavBarBtn">
         <span>Logout</span>
       </v-btn>
-       {{currentUser.name}}
-      
+     <v-btn color="warning" fab light id="NavBarBtn">
+          <v-icon >mdi-account</v-icon>
+      </v-btn>
 </nav>  
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import {mapState} from 'vuex';
 export default Vue.extend({
 	data() {
 		return {
 			title: "SKS-F",
 		};
 	},
-
 	methods: {
 		async logout(){
 			await this.$auth.logout();
 			this.$router.push("/login");
 		},		
-	},
-  computed:{
-    ...mapState(['currentUser'])
-
-  }
+	}
 });
 </script>
 
