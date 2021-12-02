@@ -4,11 +4,10 @@
         <span>{{ title }}</span>
       </v-toolbar-title>
       <v-spacer />
+       {{currentUser.name}}
     <v-btn @click="logout()" color="accent" id="NavBarBtn">
         <span>Logout</span>
-      </v-btn>
-      <v-icon left >mdi-account</v-icon>
-       {{currentUser.name}}
+      </v-btn>     
       
 </nav>  
 </template>
