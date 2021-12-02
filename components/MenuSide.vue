@@ -23,24 +23,24 @@
 
 <script>
 export default {
-  name: "MenuSide",
-  data: () => ({
-    selectedItem: 1,
-    items: [
-      { text: "Home", icon: "mdi-home" },
-      {
-        text: "Alarmliste",
-        icon: "mdi-flag",
-        href: "../components/AlarmListe",
-        path: "../components/AlarmListe",
-      },
-      {
-        text: "Checkliste",
-        icon: "mdi-email",
-        href: "./krisenwerkzeuge",
-      },
-      { text: "Account", icon: "mdi-account-box" },
-    ],
-  }),
+	name: "MenuSide",
+	data: () => ({
+		selectedItem: 1,
+		items: [
+			{ text: "Home", icon: "mdi-home" },
+			{
+				text: "Alarmliste",
+				icon: "mdi-flag",
+				href: "../components/AlarmListe",
+				path: "../components/AlarmListe",
+			},
+			{
+				text: "Checkliste",
+				icon: "mdi-email",
+				href: "./krisenwerkzeuge",
+			},
+			{ text: "Account", icon: "mdi-account-box" },
+		],
+	}),
 };
 </script>

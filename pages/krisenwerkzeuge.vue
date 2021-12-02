@@ -45,7 +45,7 @@ body {
   height: 100%;
   padding: 0;
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
 }
 #menu-side {
   padding: 0;

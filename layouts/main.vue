@@ -1,22 +1,35 @@
 <template>
   <v-app>
-    <v-toolbar
-      color="primary"
-      light
-      fixed
-      clipped-bottom />
-    <Nuxt />
-    <v-footer
-      :absolute="!fixed"
-      app
-    >
-      <span>&copy; {{ new Date().getFullYear() }}</span>
+    <v-app-bar app :elevation="5">
+		<div class="d-flex justify-space-between align-center" style="width: 100%">
+        <v-btn @click="$router.push('/')">
+            <v-icon>mdi-view-dashboard-variant</v-icon>
+        </v-btn>
+		<nav-bar-up v-if="$auth.user && $auth.loggedIn" class="mx-2"/>
+		<v-btn @click="toggleTheme"><v-icon large>mdi-theme-light-dark</v-icon></v-btn>
+		</div>
+	</v-app-bar>
+	<v-main>
+        <Nuxt />
+	</v-main>
+    <v-footer :elevation="10" app class="d-flex justify-center" style="text-align: center;">
+      <span>Sicherheitskoordinationssystem für den Flugbetrieb (SKS-F) | &copy; {{ new Date().getFullYear() }} TINF20CS1</span>
     </v-footer>
   </v-app>
 </template>
 
 <script>
 export default {
+	head() {
+		return {
+			title: "SKS-F",
+			meta: [
+				{ charset: "utf-8" },
+				{ name: "viewport", content: "width=device-width, initial-scale=1" },
+				{ hid: "description", name: "description", content: "Sicherheitskoordinationssystem für den Flugbetrieb" }
+			],
+		};
+	},
 	data () {
 		return {
 			clipped: false,
@@ -39,6 +52,18 @@ export default {
 			rightDrawer: false,
 			title: "Vuetify.js"
 		};
+	},
+	computed: {
+		dark () {
+			console.log(this.$vuetify.theme.dark);
+			return this.$vuetify.theme.dark;
+		}
+	},
+	methods: {
+		toggleTheme () {
+			console.log(this.$vuetify.theme.dark);
+			this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
+		}
 	}
 };
 </script>

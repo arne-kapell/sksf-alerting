@@ -106,22 +106,22 @@ const config: NuxtConfig = {
 		theme: {
 			light: true,
 			themes: {
-				// dark: {
-				// 	primary: colors.blue.darken2,
-				// 	accent: colors.grey.darken3,
-				// 	secondary: colors.amber.darken3,
-				// 	info: colors.teal.lighten1,
-				// 	warning: colors.amber.base,
-				// 	error: colors.deepOrange.accent4,
-				// 	success: colors.green.accent3
-				// }
-				light:{
-					primary: '#ffffff',
-					accent: '#3068ab',
-					secondary: '#e9eaed',
+				dark: {
+					primary: colors.blue.darken2,
+					accent: colors.grey.darken3,
+					secondary: colors.amber.darken3,
 					info: colors.teal.lighten1,
-					warning:'#eeba22' ,
-					error: '#cd424f',
+					warning: colors.amber.base,
+					error: colors.deepOrange.accent4,
+					success: colors.green.accent3
+				},
+				light:{
+					primary: "#ffffff",
+					accent: "#3068ab",
+					secondary: "#e9eaed",
+					info: colors.teal.lighten1,
+					warning:"#eeba22" ,
+					error: "#cd424f",
 					success: colors.green.accent3
 				}
 			}
@@ -132,7 +132,7 @@ const config: NuxtConfig = {
 	build: {
 	},
 
-	ssr: true
+	ssr: false
 };
 
 export default config;

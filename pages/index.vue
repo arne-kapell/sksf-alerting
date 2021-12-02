@@ -1,23 +1,19 @@
 <template>
-  <div id="root" >
-    <v-app>
-      <v-container class="main-page container--fluid">
-        <NavBarUp/>
-        <v-col class="col-2" >
-          <MenuSide/>
+      <v-container fluid class="main-page">
+        <v-col class="col-2 pa-0">
+          <menu-side/>
         </v-col>
         <v-col class="col-7 offset-1">
-          <AlarmListe/>
+          <alarm-liste/>
         </v-col>
       </v-container>
-    </v-app>
-  </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import type { NuxtSocket, NuxtSocketOpts } from "nuxt-socket-io";
 import { TokenableScheme } from "@nuxtjs/auth-next";
+
 export default Vue.extend({
 	middleware: "auth",
 	layout: "main",
@@ -46,20 +42,12 @@ body {
   margin: 0;
   padding: 0;
 }
-#root {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow-y: scroll;
-  background-color: white;
-}
 
 .main-page{
   height: 100%;
   padding: 0;
   display: flex;
-  justify-content: start;
+  justify-content: flex-start;
 }
 #menu-side {
   padding: 0;

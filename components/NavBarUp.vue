@@ -1,39 +1,31 @@
 <template>
-  <nav>
-    <v-app-bar  color=primary light app>
-      <!-- <v-app-bar-nav-icon class="grey--text" @click="drawer = !drawer"></v-app-bar-nav-icon> -->
+  <nav class="d-flex flex-grow-1 align-center">
       <v-toolbar-title class="text--center" >
         <span>Projekt</span>
       </v-toolbar-title>
-      <v-spacer> </v-spacer>
+      <v-spacer />
     <v-btn @click="logout()" color="accent" id="NavBarBtn">
         <span>Logout</span>
       </v-btn>
      <v-btn color="warning" fab light id="NavBarBtn">
           <v-icon >mdi-account</v-icon>
-      </v-btn> 
- 
-    </v-app-bar> 
-
- 
+      </v-btn>
 </nav>  
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 export default Vue.extend({
-	middleware: "auth",
-	layout: "main",
 	data() {
 		return {
 			light: true,
 		};
 	},
 	methods: {
-    async logout(){
-      await this.$auth.logout();
-      this.$router.push("/login");
-    },		
+		async logout(){
+			await this.$auth.logout();
+			this.$router.push("/login");
+		},		
 	}
 });
 </script>
