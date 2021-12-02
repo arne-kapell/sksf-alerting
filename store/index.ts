@@ -1,5 +1,6 @@
 import { GetterTree, ActionTree, MutationTree } from "vuex";
 
+
 export const state = () => ({
 	alarms: [] as Alarm[],
 	numbers: 1 as number
@@ -22,3 +23,4 @@ export const actions: ActionTree<RootState, RootState> = {
 		commit("SET_ALARMS", res.alarms);
 	}
 };
+
