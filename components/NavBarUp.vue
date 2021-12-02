@@ -7,8 +7,9 @@
     <v-btn @click="logout()" color="accent" id="NavBarBtn">
         <span>Logout</span>
       </v-btn>
-     <v-btn color="warning" fab light id="NavBarBtn">
-          <v-icon >mdi-account</v-icon>
+     <v-btn text color="warning" fab light id="NavBarBtn">
+          <span > Username</span>
+          <v-icon left>mdi-account</v-icon>
       </v-btn>
 </nav>  
 </template>
@@ -26,7 +27,10 @@ export default Vue.extend({
 			await this.$auth.logout();
 			this.$router.push("/login");
 		},		
-	}
+	},
+  mounted(){
+    console.log(this.$auth.user);
+  }
 });
 </script>
 
