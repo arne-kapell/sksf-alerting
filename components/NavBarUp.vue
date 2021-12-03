@@ -7,11 +7,12 @@
     <v-btn @click="logout()" color="accent" id="NavBarBtn">
         <span>Logout</span>
       </v-btn>
-     <v-btn text color="warning" fab light id="NavBarBtn">
-          <v-icon left > mdi-account </v-icon>
-          <span v-for="user in User" :key="user.uid" >mail: {{user.mail}}</span>
-          
-      </v-btn>
+      <v-chip  class="ma-2" label fab light>
+      <v-icon left> mdi-account-circle-outline</v-icon>
+      <span v-for="user in User" :key="user" > {{user}}</span>
+    </v-chip>
+          <!--<span v-for="user in User" :key="user" > {{user}}</span> -->
+ 
 </nav>  
 </template>
 
