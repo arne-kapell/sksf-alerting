@@ -4,23 +4,23 @@
         <span>{{ title }}</span>
       </v-toolbar-title>
       <v-spacer />
-    <v-btn @click="logout()" color="accent" id="NavBarBtn">
+      <v-chip color="green" class="mr-2">
+      <v-icon left>mdi-account-circle-outline</v-icon>
+        {{ user.mail }}
+      </v-chip> 
+    <v-btn @click="logout()" color="error" id="NavBarBtn">
         <span>Logout</span>
       </v-btn>
-      <v-chip  class="ma-2" label fab light>
-      <v-icon left> mdi-account-circle-outline</v-icon>
-      <span v-for="user in User" :key="user" > {{user}}</span>
-    </v-chip>
-          <!--<span v-for="user in User" :key="user" > {{user}}</span> -->
- 
+      <!-- <v-avatar color="primary" size="45"> -->
+      <!-- {{ user.mail[0]  + "@" + user.mail.split('@')[0][0] }}
+    </v-avatar> -->
 </nav>  
 </template>
 
 <script lang="ts">
-import { mapGetters, mapActions} from "vuex";
 import Vue from "vue";
 export default Vue.extend({
-  components: {},
+	components: {},
 	data() {
 		return {
 			title: "SKS-F",
@@ -32,11 +32,11 @@ export default Vue.extend({
 			this.$router.push("/login");
 		},		
 	},
-  computed:{
-    user(): User[]{
-      return this.$store.state.user;
-    },
-  },
+	computed:{
+		user() {
+			return this.$auth.user;
+		},
+	},
 });
 </script>
 

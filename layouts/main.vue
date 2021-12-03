@@ -14,7 +14,7 @@
 			<nav-bar-up v-if="$auth.user && $auth.loggedIn" class="mx-2"/>
 			<v-tooltip bottom>
 				<template v-slot:activator="{ on }">
-					<v-btn v-on="on" @click="toggleTheme"><v-icon large>mdi-theme-light-dark</v-icon></v-btn>
+					<v-btn v-on="on" @click="toggleTheme" fab small class="pa-2"><v-icon large>mdi-theme-light-dark</v-icon></v-btn>
 				</template>
 				<span>{{ $vuetify.theme.dark ? "Switch to light mode" : "Switch to dark mode" }}</span>
 			</v-tooltip>
