@@ -31,13 +31,13 @@ export default {
 			{
 				text: "Alarmliste",
 				icon: "mdi-flag",
-				href: "../components/AlarmListe",
-				path: "../components/AlarmListe",
+				//href: "../components/AlarmListe.vue",
+				path: "../AlarmListePage",
 			},
 			{
 				text: "Checkliste",
 				icon: "mdi-email",
-				href: "./krisenwerkzeuge",
+				path: "./krisenwerkzeuge",
 			},
 			{ text: "Account", icon: "mdi-account-box" },
 		],
