@@ -3,35 +3,39 @@ import { Server, Socket } from "socket.io";
 import { hash, compare } from "bcrypt";
 import { sign, verify } from "jsonwebtoken";
 import * as portUsed from "tcp-port-used";
-import * as m from "../db/models";
 import axios, { AxiosBasicCredentials, AxiosError } from "axios";
+import db from "../db";
+import { Action, Alarm, AlarmOuput, Checklist, ChecklistAction, ChecklistActionInput, User } from "../db/models";
+import { asyncForEach } from "./helpers";
 const app = express();
 let io: Server | null = null;
+
+// Sync database
+const syncOptions = {
+	// force: true,
+	alter: process.env.NODE_ENV === "development"
+};
+db.modelManager.addModel(Action);
+db.modelManager.addModel(Alarm);
+db.modelManager.addModel(Checklist);
+db.modelManager.addModel(ChecklistAction);
+db.modelManager.addModel(User);
+db.sync(syncOptions);
 
 app.use(json());
 app.all("/tinf20cs1", (req, res) => {
 	res.json({ secret: "SECURITY!!!" });
 });
 
-// Sync database
-const syncOptions = {
-	alter: process.env.NODE_ENV === "development"
-};
-m.User.sync(syncOptions);
-m.Action.sync(syncOptions);
-m.Checklist.sync(syncOptions);
-m.Alarm.sync(syncOptions);
-m.ChecklistAction.sync(syncOptions);
-
 // Authentication middlewares
 const tokenSecret = process.env.JWT_SECRET || "secret_sks-f";
 const auth: (token: string) => Promise<boolean | User> = async (token) => {
 	try {
 		const decoded = verify(token, tokenSecret) as { uid: number, mail: string, name: string, privileged: boolean };
-		const user = await m.User.findByPk(decoded.uid);
+		const user = await User.findByPk(decoded.uid);
 		if (user) {
 			return {
-				uid: user.get("uid"),
+				uid: user.uid,
 				mail: user.get("mail"),
 				name: user.get("name"),
 				privileged: user.get("privileged")
@@ -73,6 +77,7 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
 	}
 };
 
+// Middleware for starting socket.io server
 app.use(async (req, res, next) => {
 	if (!io) {
 		const running = await portUsed.check(3001);
@@ -103,11 +108,10 @@ app.use(async (req, res, next) => {
 	next();
 });
 
-
 // Authentication endpoints
 app.post("/login", async (req, res) => {
 	const { mail, password } = req.body;
-	const user = await m.User.findOne({ where: { mail } });
+	const user = await User.findOne({ where: { mail } });
 	const isValid = user && await compare(password, user.get("pwdHash"));
 	if (isValid) {
 		res.json({
@@ -122,15 +126,14 @@ app.post("/login", async (req, res) => {
 		res.status(401).json({ error: (!user) ? "Unknown mail" : "Invalid password" });
 	}
 });
-
 app.post("/register", async (req, res) => {
 	const { mail, password, name } = req.body;
-	const user = await m.User.findOne({ where: { mail } });
+	const user = await User.findOne({ where: { mail } });
 	if (user) {
 		res.status(400).json({ error: "Mail already in use" });
 	} else {
 		const hashedPwd = await hash(password, 10);
-		const newUser = await m.User.create({
+		const newUser = await User.create({
 			mail,
 			name,
 			pwdHash: hashedPwd,
@@ -138,15 +141,14 @@ app.post("/register", async (req, res) => {
 		});
 		res.json({
 			token: sign({
-				uid: newUser?.get("uid"),
-				name: newUser?.get("name"),
-				mail: newUser?.get("mail"),
-				privileged: newUser?.get("privileged"),
+				uid: newUser?.uid,
+				name: newUser?.name,
+				mail: newUser?.mail,
+				privileged: newUser?.privileged,
 			}, tokenSecret, { expiresIn: "1h" })
 		});
 	}
 });
-
 app.get("/user-info", expressAuth, async (req, res) => {
 	const user = res.locals.user as User;
 	res.json({
@@ -178,40 +180,44 @@ const notify = async (alarm: Alarm) => {
 	}
 };
 
-// Realtime alarm endpoint
+// Realtime alarm endpoint for analysis modules
 app.post("/realtime-alarm", async (req, res) => {
 	const mapAlarm = (a: Alarm) => {
 		return {
+			api: a.api,
 			risk: a.risk,
 			source: a.source,
 			message: a.message,
-			checklistId: a.checklistId
-		} as m.AlarmInput;
+		};
 	};
-	
 	const { alarm } = req.body;
-	const existing = await m.Alarm.findOne({ where: { uid: alarm.uid } });
 	let uid: number | boolean = false;
-	if (existing) {
-		uid = (await existing.update(mapAlarm(alarm))).get("uid");
+	if (alarm.uid) {
+		const existing = await Alarm.findOne({ where: { uid: alarm.uid } });
+		if (existing) {
+			uid = (await existing.update(mapAlarm(alarm))).get("uid");
+		} else {
+			uid = (await Alarm.create(mapAlarm(alarm))).uid;
+		}
 	} else {
-		uid = (await m.Alarm.create(mapAlarm(alarm))).get("uid");
+		uid = (await Alarm.create(mapAlarm(alarm))).uid;
 	}
 	res.json({ success: true, uid: uid });
 	notify(alarm);
 });
 
 // Alarm endpoint for ui
-app.get("/alarms", expressAuth, async (req, res) => {
-	const alarms = await m.Alarm.findAll({
-		order: [["updatedAt", "DESC"]],
-		limit: 100
+app.get("/alarms/:limit", expressAuth, async (req, res) => {
+	const { limit } = req.params;
+	const alarms = await Alarm.findAll({
+		order: [["uid", "ASC"]],
+		limit: limit ? Number(limit) : 10,
 	});
-	console.log(alarms);
 	res.json({
-		alarms: alarms.map((a) => ({
+		alarms: alarms.map((a: Alarm) => ({
 			uid: a.get("uid"),
 			risk: a.get("risk"),
+			api: a.get("api"),
 			source: a.get("source"),
 			message: a.get("message"),
 			checklistId: a.get("checklistId"),
@@ -222,22 +228,134 @@ app.get("/alarms", expressAuth, async (req, res) => {
 
 // Endpoint for high-level passenger information
 app.get("/passenger/information", async (req, res) => {
-	const alarms = await m.Alarm.findAll({
+	const alarms = await Alarm.findAll({
 		order: [["updatedAt", "DESC"]],
 		limit: 100
-	}) as m.AlarmSourceChecklist[];
+	});
 	res.json({
-		count: alarms.length,
-		alarms: alarms.map(a => {
+		count: alarms?.length,
+		alarms: alarms?.map((a: Alarm) => {
 			const date = new Date(a.get("updatedAt"));
 			const diff = Math.abs(date.getTime() - new Date().getTime());
 			const diffMinutes = Math.floor((diff / 1000) / 60);
 			return {
-				since: (diffMinutes > 0) ? diffMinutes + " minutes" : "just now",
+				since: (diffMinutes > 0) ? diffMinutes + " minutes ago" : "just now",
 				risk: a.get("risk"),
-				system: a.get("source")
+				system: a.get("api")
 			};
 		})
+	});
+});
+
+// Endpoints for checklist management
+app.get("/checklist/:uid", expressAuth, async (req, res) => {
+	const cUid = Number(req.params.uid);
+	const checklist = await Checklist.findByPk(cUid, {
+		include: [{ model: Action, as: "Actions" }]
+	});
+	if (!checklist) {
+		res.status(404).json({ error: "Checklist not found" });
+	} else {
+		res.json({
+			uid: checklist.get("uid"),
+			name: checklist.get("name"),
+			source: checklist.get("source"),
+			progress: checklist.get("progress"),
+			actions: checklist.get("Actions").map((a: Action) => ({
+				uid: a.get("uid"),
+				content: a.get("content")
+			}))
+		});
+	}
+});
+app.post("/checklist", expressAuth, async (req, res) => {
+	const { name, source, actions } = req.body;
+	await asyncForEach(actions, async (a: ActionType, i: number) => {
+		if (!a.uid) {
+			actions[i] = await Action.create({
+				content: a.content
+			});
+		} else {
+			actions[i] = Action.findByPk(a.uid);
+		}
+	});
+	const checklist = await Checklist.create({
+		name,
+		source,
+		Actions: actions
+	}, {
+		include: [ { model: Action, as: "Actions" } ]
+	});
+	await asyncForEach(actions, async (a: Action) => {
+		await ChecklistAction.create({
+			checklistId: checklist.uid,
+			actionId: a.uid
+		});
+	});
+	const final = await Checklist.findByPk(checklist.uid, {
+		include: [ { model: Action, as: "Actions" } ]
+	});
+	res.json({
+		success: true,
+		checklist: {
+			uid: final?.get("uid"),
+			name: final?.get("name"),
+			source: final?.get("source"),
+			progress: final?.get("progress"),
+			actions: final?.get("Actions").map((a: Action) => ({
+				uid: a.get("uid"),
+				content: a.get("content")
+			}))
+		}
+	});
+});
+app.put("/checklist/:uid", expressAuth, async (req, res) => {
+	const cUid = Number(req.params.uid);
+	const { name, source, progress } = req.body;
+	const checklist = await Checklist.findByPk(cUid);
+	if (!checklist) {
+		res.status(404).json({ error: "Checklist not found" });
+	} else {
+		await checklist.update({
+			name,
+			source,
+			progress
+		});
+		res.json({
+			success: true,
+			checklist: {
+				uid: checklist.get("uid"),
+				name: checklist.get("name"),
+				source: checklist.get("source"),
+				progress: checklist.get("progress")
+			}
+		});
+	}
+});
+app.delete("/checklist/:uid", expressAuth, async (req, res) => {
+	const cUid = Number(req.params.uid);
+	const checklist = await Checklist.findByPk(cUid);
+	console.log(checklist);
+	if (!checklist) {
+		res.status(404).json({ error: "Checklist not found" });
+	} else {
+		await checklist.destroy();
+		res.json({ success: true });
+	}
+});
+
+// Endpoints for action management
+app.get("/actions/:limit", expressAuth, async (req, res) => {
+	const { limit } = req.params;
+	const actions = await Action.findAll({
+		order: [["updatedAt", "DESC"]],
+		limit: limit ? Number(limit) : 10
+	});
+	res.json({
+		actions: actions.map((a: Action) => ({
+			uid: a.get("uid"),
+			content: a.get("content")
+		}))
 	});
 });
 
