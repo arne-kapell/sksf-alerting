@@ -5,7 +5,7 @@ import { sign, verify } from "jsonwebtoken";
 import * as portUsed from "tcp-port-used";
 import axios, { AxiosBasicCredentials, AxiosError } from "axios";
 import db from "../db";
-import { Action, Alarm, AlarmOuput, Checklist, ChecklistAction, ChecklistActionInput, User } from "../db/models";
+import { Action, Alarm, Checklist, ChecklistAction, User } from "../db/models";
 import { asyncForEach } from "./helpers";
 const app = express();
 let io: Server | null = null;
@@ -23,9 +23,6 @@ db.modelManager.addModel(User);
 db.sync(syncOptions);
 
 app.use(json());
-app.all("/tinf20cs1", (req, res) => {
-	res.json({ secret: "SECURITY!!!" });
-});
 
 // Authentication middlewares
 const tokenSecret = process.env.JWT_SECRET || "secret_sks-f";
@@ -132,7 +129,8 @@ app.post("/register", async (req, res) => {
 	if (user) {
 		res.status(400).json({ error: "Mail already in use" });
 	} else {
-		const hashedPwd = await hash(password, 10);
+		const saltRounds = Math.floor(Math.random() * (10 - 5 + 1)) + 5;
+		const hashedPwd = await hash(password, saltRounds);
 		const newUser = await User.create({
 			mail,
 			name,
@@ -172,7 +170,7 @@ const notify = async (alarm: Alarm) => {
 			withCredentials: true,
 			auth: {
 				username: "tinf19cs",
-				password: "$sse1%8Dh2bw"
+				password: process.env.API_PASSWORD
 			} as AxiosBasicCredentials
 		});
 	} catch (e) {
