@@ -6,8 +6,7 @@
           <v-list-item
             v-for="(item, i) in items"
             :key="i"
-            :href="item.href"
-            :to="item.path == '#' ? '' : item.path"
+            :to="item.path"
           >
             <v-list-item-icon  class="pa-md-4 mx-lg-auto" >
               <v-icon v-text="item.icon" color="black" ></v-icon>
@@ -25,23 +24,22 @@
 export default {
 	name: "MenuSide",
 	data: () => ({
-		selectedItem: 1,
+    selectedItem: 1,
 		items: [
-			{ text: "Home", icon: "mdi-home" },
-			{
-				text: "Alarmliste",
-				icon: "mdi-flag",
-				//href: "../components/AlarmListe.vue",
-				path: "../AlarmListePage",
-			},
+			{ text: "Dashboard", 	
+        icon: "mdi-view-dashboard-variant", 
+        path: "/" 
+        
+      },
 			{
 				text: "Checkliste",
 				icon: "mdi-email",
-				path: "./krisenwerkzeuge",
+				path: "/krisenwerkzeuge",
 
 			},
 			{ text: "Account", icon: "mdi-account-box" },
 		],
+    
 	}),
 };
 </script>
