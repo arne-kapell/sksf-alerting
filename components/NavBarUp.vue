@@ -1,24 +1,29 @@
 <template>
   <nav class="d-flex flex-grow-1 align-center">
       <v-toolbar-title class="text--center" >
-        <span>Projekt</span>
+        <span>{{ title }}</span>
       </v-toolbar-title>
       <v-spacer />
     <v-btn @click="logout()" color="accent" id="NavBarBtn">
         <span>Logout</span>
       </v-btn>
-     <v-btn color="warning" fab light id="NavBarBtn">
-          <v-icon >mdi-account</v-icon>
-      </v-btn>
+      <v-chip  class="ma-2" label fab light>
+      <v-icon left> mdi-account-circle-outline</v-icon>
+      <span v-for="user in User" :key="user" > {{user}}</span>
+    </v-chip>
+          <!--<span v-for="user in User" :key="user" > {{user}}</span> -->
+ 
 </nav>  
 </template>
 
 <script lang="ts">
+import { mapGetters, mapActions} from "vuex";
 import Vue from "vue";
 export default Vue.extend({
+  components: {},
 	data() {
 		return {
-			light: true,
+			title: "SKS-F",
 		};
 	},
 	methods: {
@@ -26,7 +31,12 @@ export default Vue.extend({
 			await this.$auth.logout();
 			this.$router.push("/login");
 		},		
-	}
+	},
+  computed:{
+    user(): User[]{
+      return this.$store.state.user;
+    },
+  },
 });
 </script>
 
