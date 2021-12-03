@@ -38,6 +38,8 @@ export default {
 				text: "Checkliste",
 				icon: "mdi-email",
 				href: "./krisenwerkzeuge",
+				href: "./components/CheckListe",
+
 			},
 			{ text: "Account", icon: "mdi-account-box" },
 		],
