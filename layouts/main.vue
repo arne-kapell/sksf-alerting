@@ -85,16 +85,16 @@ export default {
 		}
 	},
 	async asyncData ({ store }) {
-		return await store.dispatch("getAlarms");
+		await store.dispatch("getAlarms");
 	},
-	created () {
+	async created () {
 		if (this.$auth.user && this.$auth.loggedIn) {
+			await this.$store.dispatch("getAlarms");
 			this.connectSocket();
 		}
 	},
 	watch: {
-		"socket.connected"(to, from) {
-			// console.log(to, from);
+		"socket.connected": function(to, from) {
 			if (to && !from && this.$auth.loggedIn) {
 				this.alerts = this.alerts.map(a => {
 					if (a.type === "warning" && a.text === "Disconnected from realtime updates") {
@@ -130,15 +130,14 @@ export default {
 				}, 1);
 			}
 		},
-		"$auth.loggedIn"(to, from) {
+		"$auth.loggedIn": async function(to, from) {
 			console.log(to, from);
 			if (!to && from) {
 				this.socket?.disconnect();
 				this.socket = null;
 				this.$router.push("/login");
-				this.$auth.options.watchLoggedIn = true;
 			} else if (to && !from) {
-				this.$auth.options.watchLoggedIn = false;
+				await this.$store.dispatch("getAlarms");
 				this.connectSocket();
 			}
 		}
