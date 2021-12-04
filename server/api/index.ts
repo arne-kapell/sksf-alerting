@@ -183,7 +183,7 @@ app.post("/realtime-alarm", async (req: Request, res: Response) => {
 			api: a.api,
 			risk: a.risk,
 			source: a.source,
-			message: a.message,
+			message: a.message
 		};
 	};
 	const { alarm } = req.body;
@@ -217,6 +217,7 @@ app.get("/alarms/:limit", expressAuth, async (req: Request, res: Response) => {
 			source: a.get("source"),
 			message: a.get("message"),
 			checklistId: a.get("checklistId"),
+			progress: a.get("progress"),
 			datetime: a.get("updatedAt")
 		}))
 	});
@@ -256,10 +257,12 @@ app.get("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 			uid: checklist.get("uid"),
 			name: checklist.get("name"),
 			source: checklist.get("source"),
-			progress: checklist.get("progress"),
 			actions: checklist.get("Actions").map((a: Action) => ({
 				uid: a.get("uid"),
-				content: a.get("content")
+				name: a.get("name"),
+				function: a.get("function"),
+				responsiblePerson: a.get("responsiblePerson"),
+				info: a.get("info")
 			}))
 		});
 	}
@@ -269,10 +272,13 @@ app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 	await asyncForEach(actions, async (a: ActionType, i: number) => {
 		if (!a.uid) {
 			actions[i] = await Action.create({
-				content: a.content
+				name: a.name,
+				function: a.function,
+				responsiblePerson: a.responsiblePerson,
+				info: a.info
 			});
 		} else {
-			actions[i] = Action.findByPk(a.uid);
+			actions[i] = await Action.findByPk(a.uid);
 		}
 	});
 	const checklist = await Checklist.create({
@@ -297,17 +303,19 @@ app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 			uid: final?.get("uid"),
 			name: final?.get("name"),
 			source: final?.get("source"),
-			progress: final?.get("progress"),
 			actions: final?.get("Actions").map((a: Action) => ({
 				uid: a.get("uid"),
-				content: a.get("content")
+				name: a.get("name"),
+				function: a.get("function"),
+				responsiblePerson: a.get("responsiblePerson"),
+				info: a.get("info")
 			}))
 		}
 	});
 });
 app.put("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
-	const { name, source, progress, actions } = req.body;
+	const { name, source, actions } = req.body;
 	const checklist = await Checklist.findByPk(cUid, {
 		include: [ { model: Action, as: "Actions" } ]
 	});
@@ -317,24 +325,45 @@ app.put("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 		await asyncForEach(actions, async (a: ActionType, i: number) => {
 			if (!a.uid) {
 				actions[i] = await Action.create({
-					content: a.content
+					name: a.name,
+					function: a.function,
+					responsiblePerson: a.responsiblePerson,
+					info: a.info
 				});
 			} else {
-				actions[i] = Action.findByPk(a.uid);
+				actions[i] = await Action.findByPk(a.uid);
 			}
 		});
 		await checklist.update({
 			name,
-			source,
-			progress
+			source
+		});
+		const relations = await ChecklistAction.findAll({ where: { checklistId: cUid } });
+		const relationsToDelete = relations.filter((r: ChecklistAction) => actions.map((a: Action) => a.get("uid")).indexOf(r.actionId) === -1);
+		await asyncForEach(relationsToDelete, async (r: ChecklistAction) => await r.destroy());
+		const relationsToCreate = actions.filter((a: Action) => relations.map((r: ChecklistAction) => r.get("actionId")).indexOf(a.uid) === -1);
+		await asyncForEach(relationsToCreate, async (a: Action) => {
+			await ChecklistAction.create({
+				checklistId: cUid,
+				actionId: a.get("uid")
+			});
+		});
+		const final = await Checklist.findByPk(checklist.get("uid"), {
+			include: [ { model: Action, as: "Actions" } ]
 		});
 		res.json({
 			success: true,
 			checklist: {
-				uid: checklist.get("uid"),
-				name: checklist.get("name"),
-				source: checklist.get("source"),
-				progress: checklist.get("progress")
+				uid: final?.get("uid"),
+				name: final?.get("name"),
+				source: final?.get("source"),
+				actions: final?.get("Actions").map((a: Action) => ({
+					uid: a.get("uid"),
+					name: a.get("name"),
+					function: a.get("function"),
+					responsiblePerson: a.get("responsiblePerson"),
+					info: a.get("info")
+				}))
 			}
 		});
 	}
@@ -351,7 +380,7 @@ app.delete("/checklist/:uid", expressAuth, async (req: Request, res: Response) =
 	}
 });
 
-// Endpoints for action management
+// Endpoint for action query
 app.get("/actions/:limit", expressAuth, async (req: Request, res: Response) => {
 	const { limit } = req.params;
 	const actions = await Action.findAll({
@@ -361,7 +390,10 @@ app.get("/actions/:limit", expressAuth, async (req: Request, res: Response) => {
 	res.json({
 		actions: actions.map((a: Action) => ({
 			uid: a.get("uid"),
-			content: a.get("content")
+			name: a.get("name"),
+			function: a.get("function"),
+			responsiblePerson: a.get("responsiblePerson"),
+			info: a.get("info")
 		}))
 	});
 });

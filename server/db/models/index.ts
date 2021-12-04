@@ -3,16 +3,22 @@ import db from "..";
 
 interface ActionAttributes {
 	uid?: number;
-	content: string;
+	name: string;
+	function: string;
+	responsiblePerson?: string;
+	info?: string;
 
 	createdAt?: Date;
 	updatedAt?: Date;
 }
-export type ActionInput = Optional<ActionAttributes, "content">
+export type ActionInput = Optional<ActionAttributes, "responsiblePerson" | "info">
 export type ActionOuput = Required<ActionAttributes>
 export class Action extends Model<ActionAttributes, ActionInput> implements ActionAttributes {
 	uid!: number;
-	content!: string;
+	name!: string;
+	function!: string;
+	responsiblePerson!: string;
+	info!: string;
 
 	createdAt!: Date;
 	updatedAt!: Date;
@@ -23,7 +29,15 @@ Action.init({
 		primaryKey: true,
 		autoIncrement: true
 	},
-	content: {
+	name: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	function: {
+		type: DataTypes.STRING,
+		allowNull: false
+	},
+	info: {
 		type: DataTypes.STRING
 	}
 }, {
@@ -40,10 +54,12 @@ interface AlarmAttributes {
 
 	checklistId: number;
 
+	progress: number;
+
 	createdAt?: Date;
 	updatedAt?: Date;
 }
-export type AlarmInput = Optional<AlarmAttributes, "uid" | "checklistId" | "source" | "risk" | "message">
+export type AlarmInput = Optional<AlarmAttributes, "uid" | "checklistId" | "source" | "risk" | "message" | "progress">
 export type AlarmOuput = Required<AlarmAttributes>
 export class Alarm extends Model<AlarmAttributes, AlarmInput> implements AlarmAttributes {
 	uid!: number;
@@ -53,6 +69,8 @@ export class Alarm extends Model<AlarmAttributes, AlarmInput> implements AlarmAt
 	risk!: number;
 
 	checklistId!: number;
+
+	progress!: number;
 
 	createdAt!: Date;
 	updatedAt!: Date;
@@ -83,6 +101,11 @@ Alarm.init({
 			model: "Checklists",
 			key: "uid"
 		}
+	},
+
+	progress: {
+		type: DataTypes.INTEGER,
+		defaultValue: 0
 	}
 }, {
 	timestamps: true,
@@ -93,20 +116,18 @@ interface ChecklistAttributes {
 	uid?: number;
 	name: string;
 	source: string;
-	progress: number;
 
 	Actions?: Action[];
 
 	createdAt?: Date;
 	updatedAt?: Date;
 }
-export type ChecklistInput = Optional<ChecklistAttributes, "uid" | "name" | "source" | "progress" | "Actions">
+export type ChecklistInput = Optional<ChecklistAttributes, "uid" | "name" | "source" | "Actions">
 export type ChecklistOuput = Required<ChecklistAttributes>
 export class Checklist extends Model<ChecklistAttributes, ChecklistInput> implements ChecklistAttributes {
 	uid!: number;
 	name!: string;
 	source!: string;
-	progress!: number;
 
 	Actions!: Action[];
 
@@ -124,10 +145,6 @@ Checklist.init({
 	},
 	source: {
 		type: DataTypes.STRING
-	},
-	progress: {
-		type: DataTypes.INTEGER,
-		defaultValue: 0
 	}
 }, {
 	timestamps: true,
@@ -135,8 +152,8 @@ Checklist.init({
 });
 
 interface ChecklistActionAttributes {
-	checklistId?: number;
-	actionId?: number;
+	checklistId: number;
+	actionId: number;
 }
 export type ChecklistActionInput = Required<ChecklistActionAttributes>
 export type ChecklistActionOuput = Required<ChecklistActionAttributes>
