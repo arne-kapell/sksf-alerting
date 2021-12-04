@@ -2,7 +2,7 @@
   <div id="root" >
     <v-app>
       <v-container class="main-page container--fluid">
-        <NavBarUp/>
+        <!-- <NavBarUp/> -->
         <v-col class="col-2" id="menu-side">
           <MenuSide/>
         </v-col>
@@ -21,7 +21,7 @@ export default Vue.extend({
 	layout: "main",
 	data() {
 		return {
-			dark: true
+			light: true
 		};
 	}
 });
@@ -38,7 +38,7 @@ body {
   margin: 0;
   padding: 0;
   overflow-y: scroll;
-  background-color: white;
+  /* background-color: primary; */
 }
 
 .main-page{

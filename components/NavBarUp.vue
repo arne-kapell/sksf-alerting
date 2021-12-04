@@ -4,23 +4,28 @@
         <span>{{ title }}</span>
       </v-toolbar-title>
       <v-spacer />
-    <v-btn @click="logout()" color="accent" id="NavBarBtn">
+      <v-badge dot overlap bordered :color="socketStatus ? 'success' : 'error' " class="mr-2">
+        <v-chip color="green">
+          <v-icon left>mdi-account-circle-outline</v-icon>
+          {{ (user.name) || user.mail }}
+        </v-chip> 
+      </v-badge>
+    <v-btn @click="logout()" color="error" id="NavBarBtn">
         <span>Logout</span>
       </v-btn>
-      <v-chip  class="ma-2" label fab light>
-      <v-icon left> mdi-account-circle-outline</v-icon>
-      <span v-for="user in User" :key="user" > {{user}}</span>
-    </v-chip>
-          <!--<span v-for="user in User" :key="user" > {{user}}</span> -->
- 
 </nav>  
 </template>
 
 <script lang="ts">
-import { mapGetters, mapActions} from "vuex";
+import { Auth } from "@nuxtjs/auth-next";
 import Vue from "vue";
 export default Vue.extend({
-  components: {},
+	props: {
+		socketStatus: {
+			type: Boolean,
+			default: false
+		}
+	},
 	data() {
 		return {
 			title: "SKS-F",
@@ -29,14 +34,13 @@ export default Vue.extend({
 	methods: {
 		async logout(){
 			await this.$auth.logout();
-			this.$router.push("/login");
 		},		
 	},
-  computed:{
-    user(): User[]{
-      return this.$store.state.user;
-    },
-  },
+	computed:{
+		user() {
+			return (this.$auth as Auth).user;
+		}
+	},
 });
 </script>
 

@@ -5,7 +5,7 @@ import { sign, verify } from "jsonwebtoken";
 import * as portUsed from "tcp-port-used";
 import axios, { AxiosBasicCredentials, AxiosError } from "axios";
 import db from "../db";
-import { Action, Alarm, AlarmOuput, Checklist, ChecklistAction, ChecklistActionInput, User } from "../db/models";
+import { Action, Alarm, Checklist, ChecklistAction, User } from "../db/models";
 import { asyncForEach } from "./helpers";
 const app = express();
 let io: Server | null = null;
@@ -23,9 +23,6 @@ db.modelManager.addModel(User);
 db.sync(syncOptions);
 
 app.use(json());
-app.all("/tinf20cs1", (req, res) => {
-	res.json({ secret: "SECURITY!!!" });
-});
 
 // Authentication middlewares
 const tokenSecret = process.env.JWT_SECRET || "secret_sks-f";
@@ -78,7 +75,7 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
 };
 
 // Middleware for starting socket.io server
-app.use(async (req, res, next) => {
+app.use(async (req: Request, res: Response, next: NextFunction) => {
 	if (!io) {
 		const running = await portUsed.check(3001);
 		if (running) {
@@ -109,7 +106,7 @@ app.use(async (req, res, next) => {
 });
 
 // Authentication endpoints
-app.post("/login", async (req, res) => {
+app.post("/login", async (req: Request, res: Response) => {
 	const { mail, password } = req.body;
 	const user = await User.findOne({ where: { mail } });
 	const isValid = user && await compare(password, user.get("pwdHash"));
@@ -126,30 +123,29 @@ app.post("/login", async (req, res) => {
 		res.status(401).json({ error: (!user) ? "Unknown mail" : "Invalid password" });
 	}
 });
-app.post("/register", async (req, res) => {
-	const { mail, password, name } = req.body;
-	const user = await User.findOne({ where: { mail } });
-	if (user) {
-		res.status(400).json({ error: "Mail already in use" });
+app.post("/register", expressAuth, async (req: Request, res: Response) => {
+	const { mail, password, name, privileged } = req.body;
+	const currentUser = res.locals.user as User;
+	if (currentUser.privileged) {
+		const user = await User.findOne({ where: { mail } });
+		if (user) {
+			res.status(400).json({ error: "Mail already in use" });
+		} else {
+			const saltRounds = Math.floor(Math.random() * (10 - 5 + 1)) + 5;
+			const hashedPwd = await hash(password, saltRounds);
+			const newUser = await User.create({
+				mail,
+				name,
+				pwdHash: hashedPwd,
+				privileged: (privileged) || false
+			});
+			res.json({ success: true, uid: newUser.uid });
+		}
 	} else {
-		const hashedPwd = await hash(password, 10);
-		const newUser = await User.create({
-			mail,
-			name,
-			pwdHash: hashedPwd,
-			privileged: false
-		});
-		res.json({
-			token: sign({
-				uid: newUser?.uid,
-				name: newUser?.name,
-				mail: newUser?.mail,
-				privileged: newUser?.privileged,
-			}, tokenSecret, { expiresIn: "1h" })
-		});
+		res.status(401).json({ error: "User not permitted" });
 	}
 });
-app.get("/user-info", expressAuth, async (req, res) => {
+app.get("/user-info", expressAuth, async (req: Request, res: Response) => {
 	const user = res.locals.user as User;
 	res.json({
 		user: {
@@ -172,7 +168,7 @@ const notify = async (alarm: Alarm) => {
 			withCredentials: true,
 			auth: {
 				username: "tinf19cs",
-				password: "$sse1%8Dh2bw"
+				password: process.env.API_PASSWORD
 			} as AxiosBasicCredentials
 		});
 	} catch (e) {
@@ -181,7 +177,7 @@ const notify = async (alarm: Alarm) => {
 };
 
 // Realtime alarm endpoint for analysis modules
-app.post("/realtime-alarm", async (req, res) => {
+app.post("/realtime-alarm", async (req: Request, res: Response) => {
 	const mapAlarm = (a: Alarm) => {
 		return {
 			api: a.api,
@@ -207,7 +203,7 @@ app.post("/realtime-alarm", async (req, res) => {
 });
 
 // Alarm endpoint for ui
-app.get("/alarms/:limit", expressAuth, async (req, res) => {
+app.get("/alarms/:limit", expressAuth, async (req: Request, res: Response) => {
 	const { limit } = req.params;
 	const alarms = await Alarm.findAll({
 		order: [["uid", "ASC"]],
@@ -227,7 +223,7 @@ app.get("/alarms/:limit", expressAuth, async (req, res) => {
 });
 
 // Endpoint for high-level passenger information
-app.get("/passenger/information", async (req, res) => {
+app.get("/passenger/information", async (req: Request, res: Response) => {
 	const alarms = await Alarm.findAll({
 		order: [["updatedAt", "DESC"]],
 		limit: 100
@@ -248,7 +244,7 @@ app.get("/passenger/information", async (req, res) => {
 });
 
 // Endpoints for checklist management
-app.get("/checklist/:uid", expressAuth, async (req, res) => {
+app.get("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
 	const checklist = await Checklist.findByPk(cUid, {
 		include: [{ model: Action, as: "Actions" }]
@@ -268,7 +264,7 @@ app.get("/checklist/:uid", expressAuth, async (req, res) => {
 		});
 	}
 });
-app.post("/checklist", expressAuth, async (req, res) => {
+app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 	const { name, source, actions } = req.body;
 	await asyncForEach(actions, async (a: ActionType, i: number) => {
 		if (!a.uid) {
@@ -309,13 +305,24 @@ app.post("/checklist", expressAuth, async (req, res) => {
 		}
 	});
 });
-app.put("/checklist/:uid", expressAuth, async (req, res) => {
+app.put("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
-	const { name, source, progress } = req.body;
-	const checklist = await Checklist.findByPk(cUid);
+	const { name, source, progress, actions } = req.body;
+	const checklist = await Checklist.findByPk(cUid, {
+		include: [ { model: Action, as: "Actions" } ]
+	});
 	if (!checklist) {
 		res.status(404).json({ error: "Checklist not found" });
 	} else {
+		await asyncForEach(actions, async (a: ActionType, i: number) => {
+			if (!a.uid) {
+				actions[i] = await Action.create({
+					content: a.content
+				});
+			} else {
+				actions[i] = Action.findByPk(a.uid);
+			}
+		});
 		await checklist.update({
 			name,
 			source,
@@ -332,7 +339,7 @@ app.put("/checklist/:uid", expressAuth, async (req, res) => {
 		});
 	}
 });
-app.delete("/checklist/:uid", expressAuth, async (req, res) => {
+app.delete("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
 	const checklist = await Checklist.findByPk(cUid);
 	console.log(checklist);
@@ -345,7 +352,7 @@ app.delete("/checklist/:uid", expressAuth, async (req, res) => {
 });
 
 // Endpoints for action management
-app.get("/actions/:limit", expressAuth, async (req, res) => {
+app.get("/actions/:limit", expressAuth, async (req: Request, res: Response) => {
 	const { limit } = req.params;
 	const actions = await Action.findAll({
 		order: [["updatedAt", "DESC"]],

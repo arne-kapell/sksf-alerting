@@ -10,19 +10,27 @@
         <!-- Data Table -->
         <v-data-table
           :headers="headers"
-          :items="desserts"
+          :items="alarms"
           class="elevation-1"
         >
 
           <!-- Farbe des Risikos -->
-          <template v-slot:item.risiko="{ item }">
+      <template v-slot:item.risk="item">
             <v-chip
-              :color="getColor(item.risiko)"
+              :color="getColor(item.value)"
               light
+              dark
             >
-              {{ item.risiko }}
+              {{item.value}}
             </v-chip>
           </template>
+
+          <!-- Zeitpunktdarstellung-->
+
+          <template v-slot:item.datetime="item">
+              {{item.value = parseZeitpunkt(item.value)}}
+          </template>
+
           <template v-slot:top>
             <v-toolbar
               flat
@@ -40,7 +48,7 @@
               >
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
-                    color="primary"
+                    color="accent"
                     light
                     class="mb-2"
                     v-bind="attrs"
@@ -62,17 +70,7 @@
                           md="4"
                         >
                           <v-text-field
-                            v-model="editedItem.alertname"
-                            label="Alertname"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            v-model="editedItem.zeitpunkt"
+                            v-model="editedItem.datetime"
                             label="Zeitpunkt"
                           ></v-text-field>
                         </v-col>
@@ -82,7 +80,7 @@
                           md="4"
                         >
                           <v-text-field
-                            v-model="editedItem.risiko"
+                            v-model="editedItem.risk"
                             label="Risiko (%)"
                           ></v-text-field>
                         </v-col>
@@ -92,7 +90,7 @@
                           md="4"
                         >
                           <v-text-field
-                            v-model="editedItem.handlungsbedarf"
+                            v-model="editedItem.source"
                             label="Handlungsbedarf"
                           ></v-text-field>
                         </v-col>
@@ -160,6 +158,7 @@
   </div>
 </template>
 
+
 <script>
 import Vue from "vue";
 export default Vue.extend({
@@ -170,12 +169,11 @@ export default Vue.extend({
 					text: "ALERTNAME",
 					align: "start",
 					sortable: false,
-					value: "alertname",
+					value: "message",
 				},
-				{ text: "ZEITPUNKT ", value: "zeitpunkt" },
-				{ text: "RISIKO (%)", value: "risiko" },
-				{ text: "HANDLUNGSBEDARF", value: "handlungsbedarf" },
-				{ text: "DETAILS", value: "actions", sortable: false },
+				{text: "RISIKO", value: "risk"},
+				{text: "ZEITPUNKT ", value: "datetime"},
+				{text: "DETAILS", value: "actions", sortable: false},
 			],
 			desserts: [
 				{
@@ -252,36 +250,24 @@ export default Vue.extend({
 			],
 			editedIndex: -1,
 			editedItem: {
-				alertname: "",
-				risiko: 0,
-				handlungsbedarf: 0,
+				message: "",
+				risk: 0,
+				source: 0,
 			},
 			defaultItem: {
-				alertname: "",
-				risiko: 0,
-				handlungsbedarf: 0,
-				carbs: 0,
-				protein: 0,
-			},
-
-			computed: {
-				formTitle () {
-					return this.editedIndex === -1 ? "New Item" : "Edit Item";
-				},
-			},
-
-			watch: {
-				dialog (val) {
-					val || this.close();
-				},
-				dialogDelete (val) {
-					val || this.closeDelete();
-				},
+				message: "",
+				risk: 0,
+				source: 0,
 			},
 		};
 	},
 
 	methods: {
+		parseZeitpunkt(date){
+			date = date.split("T");
+			var zeit = date[1].split(".");
+			return   date[0] + " " + zeit[0];
+		},
 		getColor (risiko) {
 			if (risiko > 75) return "red";
 			else if (risiko > 50) return "orange";
@@ -332,6 +318,24 @@ export default Vue.extend({
 				this.desserts.push(this.editedItem);
 			}
 			this.close();
+		},
+	},
+
+	computed: {
+		formTitle () {
+			return this.editedIndex === -1 ? "New Item" : "Edit Item";
+		},
+		alarms() {
+			return this.$store.state.alarms;
+		},
+	},
+
+	watch: {
+		dialog (val) {
+			val || this.close();
+		},
+		dialogDelete (val) {
+			val || this.closeDelete();
 		},
 	},
 });

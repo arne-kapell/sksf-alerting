@@ -38,6 +38,7 @@ build/Release
 node_modules/
 jspm_packages/
 .yarn/
+.pnp.*
 
 # TypeScript v1 declaration files
 typings/
@@ -94,3 +95,4 @@ sw.*
 .dccache
 .DS_Store
 .editorconfig
+.husky/.gitignore
