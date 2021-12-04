@@ -309,11 +309,22 @@ app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 });
 app.put("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
-	const { name, source, progress } = req.body;
-	const checklist = await Checklist.findByPk(cUid);
+	const { name, source, progress, actions } = req.body;
+	const checklist = await Checklist.findByPk(cUid, {
+		include: [ { model: Action, as: "Actions" } ]
+	});
 	if (!checklist) {
 		res.status(404).json({ error: "Checklist not found" });
 	} else {
+		await asyncForEach(actions, async (a: ActionType, i: number) => {
+			if (!a.uid) {
+				actions[i] = await Action.create({
+					content: a.content
+				});
+			} else {
+				actions[i] = Action.findByPk(a.uid);
+			}
+		});
 		await checklist.update({
 			name,
 			source,
