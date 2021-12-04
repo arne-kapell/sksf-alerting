@@ -19,7 +19,8 @@ declare type Alarm = {
     risk: number,
     source: string,
     checklistId: number,
-    message: string
+    message: string,
+    datetime: Date
 }
 
 declare type User = {

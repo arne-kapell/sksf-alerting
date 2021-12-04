@@ -66,8 +66,10 @@ export default {
 	methods: {
 		toggleTheme () {
 			this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
-		},
-		connectSocket () {
+		}
+	},
+	mounted() {
+		const connectSocket = () => {
 			const token = (this.$auth.strategy as TokenableScheme).token.get();
 			this.socket = this.$nuxtSocket({
 				path: "/socket.io",
@@ -77,13 +79,11 @@ export default {
 				persist: true
 			} as NuxtSocketOpts);
 			this.$store.dispatch("getAlarms");
-		}
-	},
-	mounted() {
-		while (!this.$store) {
+		};
+		while (!this || !this.$store) {
 			console.log("waiting for store");
 		}
-		this.connectSocket();
+		connectSocket();
 	}
 };
 </script>

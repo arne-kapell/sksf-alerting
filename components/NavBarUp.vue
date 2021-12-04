@@ -17,6 +17,7 @@
 </template>
 
 <script lang="ts">
+import { Auth } from "@nuxtjs/auth-next";
 import Vue from "vue";
 export default Vue.extend({
 	props: {
@@ -38,7 +39,7 @@ export default Vue.extend({
 	},
 	computed:{
 		user() {
-			return this.$auth.user;
+			return (this.$auth as Auth).user;
 		}
 	},
 });
