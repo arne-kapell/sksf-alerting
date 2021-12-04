@@ -7,7 +7,7 @@
       <v-badge dot overlap bordered :color="socketStatus ? 'success' : 'error' " class="mr-2">
         <v-chip color="green">
           <v-icon left>mdi-account-circle-outline</v-icon>
-          {{ user.mail }}
+          {{ (user.name) || user.mail }}
         </v-chip> 
       </v-badge>
     <v-btn @click="logout()" color="error" id="NavBarBtn">
@@ -34,7 +34,6 @@ export default Vue.extend({
 	methods: {
 		async logout(){
 			await this.$auth.logout();
-			this.$router.push("/login");
 		},		
 	},
 	computed:{

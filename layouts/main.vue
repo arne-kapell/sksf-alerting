@@ -11,8 +11,7 @@
 				<span>Go to dashboard</span>
 			</v-tooltip>
 			<div v-else />
-			<nav-bar-up v-if="$auth.user && $auth.loggedIn" :socketStatus="socket && socket.connected" class="mx-2"/>
-			<socket-status :status="socketStatus"></socket-status>
+			<nav-bar-up v-if="$auth.user && $auth.loggedIn" :socketStatus="$auth.user && $auth.loggedIn && socket && socket.connected" class="mx-2"/>
 			<v-tooltip bottom>
 				<template v-slot:activator="{ on }">
 					<v-btn v-on="on" @click="toggleTheme" fab small class="pa-2"><v-icon large>mdi-theme-light-dark</v-icon></v-btn>
@@ -24,6 +23,9 @@
 	<v-main>
         <Nuxt />
 	</v-main>
+	<v-container class="alerts mr-3 mb-2">
+		<v-alert v-for="(a, i) in alerts" :key="i" :value="a.show | true" elevation="5" dense :type="a.type" :dismissible="a.dismissable | true" :transition="a.show ? 'scroll-x-reverse-transition' : 'scroll-x-transition'">{{ a.text }}</v-alert>
+	</v-container>
     <v-footer :elevation="10" app class="d-flex justify-center" style="text-align: center;">
       <span>Sicherheitskoordinationssystem für den Flugbetrieb (SKS-F) | &copy; {{ new Date().getFullYear() }} TINF20CS1</span>
     </v-footer>
@@ -31,8 +33,9 @@
 </template>
 
 <script lang="ts">
-import { NuxtSocket, NuxtSocketOpts } from "nuxt-socket-io";
-import { TokenableScheme } from "@nuxtjs/auth-next";
+import { NuxtSocketOpts } from "nuxt-socket-io";
+import { Auth, TokenableScheme } from "@nuxtjs/auth-next";
+import { Socket } from "socket.io";
 export default {
 	data () {
 		return {
@@ -54,8 +57,9 @@ export default {
 			miniVariant: false,
 			right: true,
 			rightDrawer: false,
-			socket: null as NuxtSocket | null,
-			socketStatus: {}
+			socket: null as Socket | null,
+			socketStatus: {},
+			alerts: [] as { type: "error" | "info" | "success" | "warning" | string, text: string, dismissable?: boolean, show?: boolean }[]
 		};
 	},
 	computed: {
@@ -66,24 +70,89 @@ export default {
 	methods: {
 		toggleTheme () {
 			this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
-		}
-	},
-	mounted() {
-		const connectSocket = () => {
-			const token = (this.$auth.strategy as TokenableScheme).token.get();
+		},
+		connectSocket () {
+			const token = ((this.$auth as Auth).strategy as TokenableScheme).token.get();
 			this.socket = this.$nuxtSocket({
 				path: "/socket.io",
 				extraHeaders: {
 					Authorization: token
 				},
-				persist: true
-			} as NuxtSocketOpts);
-			this.$store.dispatch("getAlarms");
-		};
-		while (!this || !this.$store) {
-			console.log("waiting for store");
+				persist: true,
+				reconnect: true,
+				reconnectAttempts: Infinity
+			} as NuxtSocketOpts) as Socket;
 		}
-		connectSocket();
+	},
+	async asyncData ({ store }) {
+		return await store.dispatch("getAlarms");
+	},
+	created () {
+		if (this.$auth.user && this.$auth.loggedIn) {
+			this.connectSocket();
+		}
+	},
+	watch: {
+		"socket.connected"(to, from) {
+			// console.log(to, from);
+			if (to && !from && this.$auth.loggedIn) {
+				this.alerts = this.alerts.map(a => {
+					if (a.type === "warning" && a.text === "Disconnected from realtime updates") {
+						a.show = false;
+					}
+					return a;
+				});
+				const alert = {
+					type: "success",
+					text: "Connected for realtime updates",
+					show: false
+				};
+				this.alerts.push(alert);
+				setTimeout(() => {
+					alert.show = true;
+					this.alerts.splice(this.alerts.indexOf(alert), 1, alert);
+				}, 1);
+				setTimeout(() => {
+					alert.show = false;
+					this.alerts.splice(this.alerts.indexOf(alert), 1, alert);
+				}, 2000);
+			} else if (!to && from && this.$auth.loggedIn) {
+				const alert = {
+					type: "warning",
+					text: "Disconnected from realtime updates",
+					dismissable: true,
+					show: false
+				};
+				this.alerts.push(alert);
+				setTimeout(() => {
+					alert.show = true;
+					this.alerts.splice(this.alerts.indexOf(alert), 1, alert);
+				}, 1);
+			}
+		},
+		"$auth.loggedIn"(to, from) {
+			console.log(to, from);
+			if (!to && from) {
+				this.socket?.disconnect();
+				this.socket = null;
+				this.$router.push("/login");
+				this.$auth.options.watchLoggedIn = true;
+			} else if (to && !from) {
+				this.$auth.options.watchLoggedIn = false;
+				this.connectSocket();
+			}
+		}
 	}
 };
 </script>
+
+<style>
+.alerts {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	z-index: 9999;
+	max-width: 60%;
+	width: max-content;
+}
+</style>
