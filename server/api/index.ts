@@ -123,28 +123,33 @@ app.post("/login", async (req: Request, res: Response) => {
 		res.status(401).json({ error: (!user) ? "Unknown mail" : "Invalid password" });
 	}
 });
-app.post("/register", async (req: Request, res: Response) => {
-	const { mail, password, name } = req.body;
-	const user = await User.findOne({ where: { mail } });
-	if (user) {
-		res.status(400).json({ error: "Mail already in use" });
+app.post("/register", expressAuth, async (req: Request, res: Response) => {
+	const { mail, password, name, privileged } = req.body;
+	const currentUser = res.locals.user as User;
+	if (currentUser.privileged) {
+		const user = await User.findOne({ where: { mail } });
+		if (user) {
+			res.status(400).json({ error: "Mail already in use" });
+		} else {
+			const saltRounds = Math.floor(Math.random() * (10 - 5 + 1)) + 5;
+			const hashedPwd = await hash(password, saltRounds);
+			const newUser = await User.create({
+				mail,
+				name,
+				pwdHash: hashedPwd,
+				privileged: (privileged) || false
+			});
+			res.json({
+				token: sign({
+					uid: newUser?.uid,
+					name: newUser?.name,
+					mail: newUser?.mail,
+					privileged: newUser?.privileged,
+				}, tokenSecret, { expiresIn: "1h" })
+			});
+		}
 	} else {
-		const saltRounds = Math.floor(Math.random() * (10 - 5 + 1)) + 5;
-		const hashedPwd = await hash(password, saltRounds);
-		const newUser = await User.create({
-			mail,
-			name,
-			pwdHash: hashedPwd,
-			privileged: false
-		});
-		res.json({
-			token: sign({
-				uid: newUser?.uid,
-				name: newUser?.name,
-				mail: newUser?.mail,
-				privileged: newUser?.privileged,
-			}, tokenSecret, { expiresIn: "1h" })
-		});
+		res.status(401).json({ error: "User not permitted." })
 	}
 });
 app.get("/user-info", expressAuth, async (req: Request, res: Response) => {
