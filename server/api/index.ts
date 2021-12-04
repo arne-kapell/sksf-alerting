@@ -139,17 +139,10 @@ app.post("/register", expressAuth, async (req: Request, res: Response) => {
 				pwdHash: hashedPwd,
 				privileged: (privileged) || false
 			});
-			res.json({
-				token: sign({
-					uid: newUser?.uid,
-					name: newUser?.name,
-					mail: newUser?.mail,
-					privileged: newUser?.privileged,
-				}, tokenSecret, { expiresIn: "1h" })
-			});
+			res.json({ success: true, uid: newUser.uid });
 		}
 	} else {
-		res.status(401).json({ error: "User not permitted." })
+		res.status(401).json({ error: "User not permitted" });
 	}
 });
 app.get("/user-info", expressAuth, async (req: Request, res: Response) => {
