@@ -75,7 +75,7 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
 };
 
 // Middleware for starting socket.io server
-app.use(async (req, res, next) => {
+app.use(async (req: Request, res: Response, next: NextFunction) => {
 	if (!io) {
 		const running = await portUsed.check(3001);
 		if (running) {
@@ -106,7 +106,7 @@ app.use(async (req, res, next) => {
 });
 
 // Authentication endpoints
-app.post("/login", async (req, res) => {
+app.post("/login", async (req: Request, res: Response) => {
 	const { mail, password } = req.body;
 	const user = await User.findOne({ where: { mail } });
 	const isValid = user && await compare(password, user.get("pwdHash"));
@@ -123,7 +123,7 @@ app.post("/login", async (req, res) => {
 		res.status(401).json({ error: (!user) ? "Unknown mail" : "Invalid password" });
 	}
 });
-app.post("/register", async (req, res) => {
+app.post("/register", async (req: Request, res: Response) => {
 	const { mail, password, name } = req.body;
 	const user = await User.findOne({ where: { mail } });
 	if (user) {
@@ -147,7 +147,7 @@ app.post("/register", async (req, res) => {
 		});
 	}
 });
-app.get("/user-info", expressAuth, async (req, res) => {
+app.get("/user-info", expressAuth, async (req: Request, res: Response) => {
 	const user = res.locals.user as User;
 	res.json({
 		user: {
@@ -179,7 +179,7 @@ const notify = async (alarm: Alarm) => {
 };
 
 // Realtime alarm endpoint for analysis modules
-app.post("/realtime-alarm", async (req, res) => {
+app.post("/realtime-alarm", async (req: Request, res: Response) => {
 	const mapAlarm = (a: Alarm) => {
 		return {
 			api: a.api,
@@ -205,7 +205,7 @@ app.post("/realtime-alarm", async (req, res) => {
 });
 
 // Alarm endpoint for ui
-app.get("/alarms/:limit", expressAuth, async (req, res) => {
+app.get("/alarms/:limit", expressAuth, async (req: Request, res: Response) => {
 	const { limit } = req.params;
 	const alarms = await Alarm.findAll({
 		order: [["uid", "ASC"]],
@@ -225,7 +225,7 @@ app.get("/alarms/:limit", expressAuth, async (req, res) => {
 });
 
 // Endpoint for high-level passenger information
-app.get("/passenger/information", async (req, res) => {
+app.get("/passenger/information", async (req: Request, res: Response) => {
 	const alarms = await Alarm.findAll({
 		order: [["updatedAt", "DESC"]],
 		limit: 100
@@ -246,7 +246,7 @@ app.get("/passenger/information", async (req, res) => {
 });
 
 // Endpoints for checklist management
-app.get("/checklist/:uid", expressAuth, async (req, res) => {
+app.get("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
 	const checklist = await Checklist.findByPk(cUid, {
 		include: [{ model: Action, as: "Actions" }]
@@ -266,7 +266,7 @@ app.get("/checklist/:uid", expressAuth, async (req, res) => {
 		});
 	}
 });
-app.post("/checklist", expressAuth, async (req, res) => {
+app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 	const { name, source, actions } = req.body;
 	await asyncForEach(actions, async (a: ActionType, i: number) => {
 		if (!a.uid) {
@@ -307,7 +307,7 @@ app.post("/checklist", expressAuth, async (req, res) => {
 		}
 	});
 });
-app.put("/checklist/:uid", expressAuth, async (req, res) => {
+app.put("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
 	const { name, source, progress } = req.body;
 	const checklist = await Checklist.findByPk(cUid);
@@ -330,7 +330,7 @@ app.put("/checklist/:uid", expressAuth, async (req, res) => {
 		});
 	}
 });
-app.delete("/checklist/:uid", expressAuth, async (req, res) => {
+app.delete("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
 	const checklist = await Checklist.findByPk(cUid);
 	console.log(checklist);
@@ -343,7 +343,7 @@ app.delete("/checklist/:uid", expressAuth, async (req, res) => {
 });
 
 // Endpoints for action management
-app.get("/actions/:limit", expressAuth, async (req, res) => {
+app.get("/actions/:limit", expressAuth, async (req: Request, res: Response) => {
 	const { limit } = req.params;
 	const actions = await Action.findAll({
 		order: [["updatedAt", "DESC"]],
