@@ -1,14 +1,15 @@
 <template>
     <v-app>
-            <v-main>
+            <v-main fluid>
                 <v-container>
-                    <v-card shaped light :loading="loading">
+                    <v-card shaped :loading="loading">
                         <v-form v-model="form.valid" @submit="login">
                             <v-container>
+								<h1 class="text-h2" style="text-align: center;">Login</h1>
                                 <v-text-field type="text" v-model="form.email" label="E-Mail" :rules="form.emailRules" required />
                                 <v-text-field type="password" v-model="form.password" label="Password" :rules="form.pwRules" required />
-								<v-row>
-									<v-btn type="submit">login</v-btn>
+								<v-row class="d-flex flex-row justify-center my-2">
+									<v-btn type="submit" :disabled="!form.valid" color="green">login</v-btn>
 									<v-alert v-if="error" type="error">{{ error }}</v-alert>
 								</v-row>
                             </v-container>
@@ -33,6 +34,7 @@ export default Vue.extend({
 			loading: false,
 			error: false as boolean | string,
 			form: {
+				valid: false,
 				email: "",
 				emailRules: [
 					(v: string) => !!v || "E-mail is required",
