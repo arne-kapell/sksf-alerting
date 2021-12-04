@@ -11,7 +11,8 @@
 				<span>Go to dashboard</span>
 			</v-tooltip>
 			<div v-else />
-			<nav-bar-up v-if="$auth.user && $auth.loggedIn" class="mx-2"/>
+			<nav-bar-up v-if="$auth.user && $auth.loggedIn" :socketStatus="socket && socket.connected" class="mx-2"/>
+			<socket-status :status="socketStatus"></socket-status>
 			<v-tooltip bottom>
 				<template v-slot:activator="{ on }">
 					<v-btn v-on="on" @click="toggleTheme" fab small class="pa-2"><v-icon large>mdi-theme-light-dark</v-icon></v-btn>
@@ -29,7 +30,9 @@
   </v-app>
 </template>
 
-<script>
+<script lang="ts">
+import { NuxtSocket, NuxtSocketOpts } from "nuxt-socket-io";
+import { TokenableScheme } from "@nuxtjs/auth-next";
 export default {
 	data () {
 		return {
@@ -51,7 +54,8 @@ export default {
 			miniVariant: false,
 			right: true,
 			rightDrawer: false,
-			title: "Vuetify.js"
+			socket: null as NuxtSocket | null,
+			socketStatus: {}
 		};
 	},
 	computed: {
@@ -61,9 +65,25 @@ export default {
 	},
 	methods: {
 		toggleTheme () {
-			console.log(this.$vuetify.theme.dark);
 			this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
+		},
+		connectSocket () {
+			const token = (this.$auth.strategy as TokenableScheme).token.get();
+			this.socket = this.$nuxtSocket({
+				path: "/socket.io",
+				extraHeaders: {
+					Authorization: token
+				},
+				persist: true
+			} as NuxtSocketOpts);
+			this.$store.dispatch("getAlarms");
 		}
+	},
+	mounted() {
+		while (!this.$store) {
+			console.log("waiting for store");
+		}
+		this.connectSocket();
 	}
 };
 </script>

@@ -4,23 +4,27 @@
         <span>{{ title }}</span>
       </v-toolbar-title>
       <v-spacer />
-      <v-chip color="green" class="mr-2">
-      <v-icon left>mdi-account-circle-outline</v-icon>
-        {{ user.mail }}
-      </v-chip> 
+      <v-badge dot overlap bordered :color="socketStatus ? 'success' : 'error' " class="mr-2">
+        <v-chip color="green">
+          <v-icon left>mdi-account-circle-outline</v-icon>
+          {{ user.mail }}
+        </v-chip> 
+      </v-badge>
     <v-btn @click="logout()" color="error" id="NavBarBtn">
         <span>Logout</span>
       </v-btn>
-      <!-- <v-avatar color="primary" size="45"> -->
-      <!-- {{ user.mail[0]  + "@" + user.mail.split('@')[0][0] }}
-    </v-avatar> -->
 </nav>  
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 export default Vue.extend({
-	components: {},
+	props: {
+		socketStatus: {
+			type: Boolean,
+			default: false
+		}
+	},
 	data() {
 		return {
 			title: "SKS-F",
@@ -35,7 +39,7 @@ export default Vue.extend({
 	computed:{
 		user() {
 			return this.$auth.user;
-		},
+		}
 	},
 });
 </script>
