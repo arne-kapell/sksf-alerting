@@ -95,3 +95,4 @@ sw.*
 .dccache
 .DS_Store
 .editorconfig
+.husky/.gitignore
