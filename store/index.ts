@@ -16,8 +16,9 @@ export const getters: GetterTree<RootState, RootState> = {
 
 export const mutations: MutationTree<RootState> = {
 	ADD_ALARM: (state, newAlarm: Alarm) => (state.alarms.push(newAlarm)),
+	ADD_USER: (state, newUser: User) => (state.user.push(newUser)),
 	SET_ALARMS: (state, alarms: Alarm[]) => (state.alarms = alarms),
-	SET_USER: (state, user: User[]) => (state.user = user),
+	SET_USER: (state, user: User[]) => (state.user = user)
 };
 
 export const actions: ActionTree<RootState, RootState> = {
