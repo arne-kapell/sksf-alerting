@@ -77,13 +77,13 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
 // Middleware for starting socket.io server
 app.use(async (req: Request, res: Response, next: NextFunction) => {
 	if (!io) {
-		const running = await portUsed.check(3001);
+		const running = await portUsed.check(Number(process.env.PORT) || 3001);
 		if (running) {
 			console.warn("Socket.io server already running, if in development mode please restart nuxt!");
 		} else {
 			io = new Server(3001, {
 				cors: {
-					origin: "http://localhost:3000",
+					origin: `${(process.env.NODE_ENV === "development") ? "http" : "https"}://${process.env.HOST || "localhost"}`,
 					methods: ["GET", "POST"]
 				}
 			});
