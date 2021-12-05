@@ -50,6 +50,7 @@ export default Vue.extend({
 				name: "",
 				nameRules: [
 					(v: string) => !!v || "Name is required",
+					// eslint-disable-next-line no-useless-escape
 					(v: string) => /.+\ .+/.test(v) || "Name must be valid",
 				],
 				privileged: false

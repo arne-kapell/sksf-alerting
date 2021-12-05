@@ -216,31 +216,9 @@ export default Vue.extend({
 			this.$nextTick(() => {
 				this.currentChecklist = {} as Checklist;
 			});
-		},
-
-		deleteItem (item) {
-			this.editedIndex = this.desserts.indexOf(item);
-			this.editedItem = Object.assign({}, item);
-			this.dialogDelete = true;
-		},
-
-		deleteItemConfirm () {
-			this.desserts.splice(this.editedIndex, 1);
-			this.closeDelete();
-		},
-
-		closeDelete () {
-			this.dialogDelete = false;
-			this.$nextTick(() => {
-				this.editedItem = Object.assign({}, this.defaultItem);
-				this.editedIndex = -1;
-			});
 		}
 	},
 	computed: {
-		formTitle () {
-			return this.editedIndex === -1 ? "New Item" : "Edit Item";
-		},
 		alarms() {
 			return this.$store.state.alarms;
 		},
@@ -254,12 +232,6 @@ export default Vue.extend({
 		}
 	},
 	watch: {
-		dialog (val) {
-			val || this.close();
-		},
-		dialogDelete (val) {
-			val || this.closeDelete();
-		},
 		async alarms (alarms) {
 			const asyncForEach = async (array: any[], callback: (item: any, index: number, array: any[]) => Promise<void>) => {
 				for (let index = 0; index < array.length; index++) {

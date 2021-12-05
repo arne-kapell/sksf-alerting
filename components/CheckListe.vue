@@ -1,3 +1,4 @@
+<script>/* eslint-disable vue/valid-v-slot */</script>
 <template>
 	<v-data-table
 	:headers="headers"
