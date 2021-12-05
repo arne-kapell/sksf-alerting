@@ -2,15 +2,7 @@
   <v-app>
     <v-app-bar app :elevation="5">
 		<div class="d-flex justify-space-between align-center" style="width: 100%">
-			<v-tooltip bottom v-if="!['/','/passenger','/login'].includes($route.path)">
-				<template v-slot:activator="{ on }">
-					<v-btn v-on="on" @click="$router.push('/')">
-						<v-icon large>mdi-view-dashboard-variant</v-icon>
-					</v-btn>
-				</template>
-				<span>Go to dashboard</span>
-			</v-tooltip>
-			<div v-else />
+			<div/>
 			<nav-bar-up v-if="$auth.user && $auth.loggedIn" :socketStatus="$auth.user && $auth.loggedIn && socket && socket.connected" class="mx-2"/>
 			<v-tooltip bottom>
 				<template v-slot:activator="{ on }">
