@@ -52,8 +52,8 @@
 						<v-toolbar-title>Überblick</v-toolbar-title>
 						<v-spacer />
 						<v-container class="d-flex justify-end align-center mr-0 mt-1" style="width: min-content;">
-							<v-progress-circular v-if="stats.high" :value="stats.high / stats.total * 100" color="orange" :size="50" class="mx-1">{{ stats.high }}</v-progress-circular>
-							<v-progress-circular v-if="!stats.critical" :value="stats.critical / stats.total * 100" color="red" :size="50" class="mx-1">{{ stats.critical }}</v-progress-circular>
+							<v-progress-circular :rotate="-90" v-if="stats.high" :value="stats.high / stats.total * 100" color="orange" :size="50" class="mx-1">{{ stats.high }}</v-progress-circular>
+							<v-progress-circular :rotate="-90" v-if="stats.critical" :value="stats.critical / stats.total * 100" color="red" :size="50" class="mx-1">{{ stats.critical }}</v-progress-circular>
 						</v-container>
 						<v-container style="width: 20%;">
 							<v-text-field
@@ -138,8 +138,9 @@
 							<v-btn
 								small
 								class="mr-2"
+								:disabled="!item.checklistId"
 								@click="openChecklist(item.uid)"
-									:color="(!item.actions || !item.progress) ? 'error' : (item.progress < item.actions.length) ? 'warning' : 'success'"
+									:color="(!checklists[alarms.indexOf(item)] || !checklists[alarms.indexOf(item)].actions) ? '' : (!item.progress) ? 'error' : (item.progress < checklists[alarms.indexOf(item)].actions.length) ? 'warning' : 'green'"
 								>
 								Checklist
 							</v-btn>
@@ -149,7 +150,7 @@
 
 				<template v-slot:item.progressPercent="{ item }">
 					<v-list-item-content style="text-align: center;">
-						<span>{{ (typeof progressPercents[alarms.indexOf(item)] === "number") ? progressPercents[alarms.indexOf(item)] + "%" : NaN }}</span>
+						{{ item.value = (typeof progressPercents[alarms.indexOf(item)] === "number") ? Number(progressPercents[alarms.indexOf(item)]) : "/" }}
 					</v-list-item-content>
 				</template>
 
@@ -173,7 +174,7 @@ export default Vue.extend({
 				{ text: "Module", value: "source" },
 				{ text: "Source", value: "api" },
 				{ text: "Actions", value: "actions", align: "end", sortable: false},
-				{ text: "Progress", value: "progressPercent", align: "end"},
+				{ text: "Progress (%)", value: "progressPercent", align: "end"},
 			],
 			editedIndex: -1,
 			editedItem: {
@@ -183,11 +184,11 @@ export default Vue.extend({
 				risk: 0,
 				source: 0,
 			},
-			checklists: [] as (Checklist | false)[],
+			// checklists: [] as (Checklist | false)[],
 			dialogChecklist: false,
 			currentChecklist: {} as Checklist,
 			search: "" as string,
-			progressPercents: [] as (number | false)[],
+			// progressPercents: [] as (number | false)[],
 			loadingProgress: false
 		};
 	},
@@ -241,37 +242,43 @@ export default Vue.extend({
 			});
 		},
 
-		async calculateLists(alarms: Alarm[]) {
-			const asyncForEach = async (array: any[], callback: (item: any, index: number, array: any[]) => Promise<void>) => {
-				for (let index = 0; index < array.length; index++) {
-					await callback(array[index], index, array);
-				}
-			};
-			const uids: number[] = alarms.map((alarm: Alarm) => alarm.checklistId | 0);
-			const checklists: (Checklist | false)[] = [];
-			const progressPercents: (number | false)[] = [];
-			await asyncForEach(uids, async (uid: number, i: number) => {
-				if (uid) {
-					const res = await this.$axios.get("/checklist/" + uid);
-					const checklist = res.data as Checklist;
-					checklist.actions = checklist.actions.map((action: ActionType, index: number) => ({
-						...action,
-						done: index < alarms[i].progress
-					}));
-					checklists.push(checklist);
-					progressPercents.push(Math.round(alarms[i].progress / res.data.actions.length * 100) | 0);
-				} else {
-					checklists.push(false);
-					progressPercents.push(false);
-				}
-			});
-			this.checklists = checklists;
-			this.progressPercents = progressPercents;
-		}
+		// async calculateLists(alarms: Alarm[]) {
+		// 	const asyncForEach = async (array: any[], callback: (item: any, index: number, array: any[]) => Promise<void>) => {
+		// 		for (let index = 0; index < array.length; index++) {
+		// 			await callback(array[index], index, array);
+		// 		}
+		// 	};
+		// 	const uids: number[] = alarms.map((alarm: Alarm) => alarm.checklistId | 0);
+		// 	const checklists: (Checklist | false)[] = [];
+		// 	const progressPercents: (number | false)[] = [];
+		// 	await asyncForEach(uids, async (uid: number, i: number) => {
+		// 		if (uid) {
+		// 			const res = await this.$axios.get("/checklist/" + uid);
+		// 			const checklist = res.data as Checklist;
+		// 			checklist.actions = checklist.actions.map((action: ActionType, index: number) => ({
+		// 				...action,
+		// 				done: index < alarms[i].progress
+		// 			}));
+		// 			checklists.push(checklist);
+		// 			progressPercents.push(Math.round(alarms[i].progress / res.data.actions.length * 100) | 0);
+		// 		} else {
+		// 			checklists.push(false);
+		// 			progressPercents.push(false);
+		// 		}
+		// 	});
+		// 	this.checklists = checklists;
+		// 	this.progressPercents = progressPercents;
+		// }
 	},
 	computed: {
 		alarms() {
 			return this.$store.state.alarms;
+		},
+		checklists() {
+			return this.$store.state.checklists;
+		},
+		progressPercents() {
+			return this.$store.state.progressPercents;
 		},
 		stats() {
 			return {
@@ -283,11 +290,11 @@ export default Vue.extend({
 		}
 	},
 	async mounted() {
-		await this.calculateLists(this.alarms);
+		this.$store.dispatch("getChecklistWithPP");
 	},
 	watch: {
 		async alarms (alarms) {
-			await this.calculateLists(alarms);
+			this.$store.dispatch("getChecklistWithPP");
 		}
 	}
 });

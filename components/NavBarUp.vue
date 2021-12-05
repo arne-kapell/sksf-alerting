@@ -4,7 +4,7 @@
       <span>{{ title }}</span>
     </v-toolbar-title>
     <v-spacer />
-    <v-badge dot overlap bordered :color="socketStatus ? 'success' : 'error' " class="mr-2">
+    <v-badge dot overlap bordered :color="socketStatus ? 'success' : 'warning' " class="mr-2">
       <v-chip color="green">
         <v-icon left>mdi-account-circle-outline</v-icon>
         {{ (user.name) || user.mail }}

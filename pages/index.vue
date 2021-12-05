@@ -24,8 +24,17 @@ export default Vue.extend({
 	},
 	data() {
 		return {
-			light: true
+			light: true,
+			interval: null as NodeJS.Timer
 		};
+	},
+	mounted() {
+		this.interval = setInterval(() => {
+			this.$store.dispatch("getAlarms");
+		}, 10000);
+	},
+	beforeDestroy() {
+		clearInterval(this.interval);
 	}
 });
 </script>
