@@ -5,7 +5,7 @@
             <menu-side/>
           </v-col>
           <v-col class="col-10 my-4">
-            <alarm-liste/>
+            <register/>
           </v-col>
         </v-row>
       <!-- </v-container> -->
@@ -24,17 +24,8 @@ export default Vue.extend({
 	},
 	data() {
 		return {
-			light: true,
-			interval: null as NodeJS.Timer
+			light: true
 		};
-	},
-	mounted() {
-		this.interval = setInterval(() => {
-			this.$store.dispatch("getAlarms");
-		}, 10000);
-	},
-	beforeDestroy() {
-		clearInterval(this.interval);
 	}
 });
 </script>

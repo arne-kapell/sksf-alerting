@@ -12,7 +12,10 @@
 		<h1 v-else class="text-h4">
 			Unknown error ({{ error.message }})
 		</h1>
-		<v-btn to="/" color="accent" class="mt-5">
+		<v-btn v-if="isDashboard" color="accent" class="mt-5" @click="reload">
+			Reload
+		</v-btn>
+		<v-btn v-else to="/" color="accent" class="mt-5">
 			Return to Dashboard
 		</v-btn>
 	</v-container>
@@ -32,6 +35,22 @@ export default {
 		return {
 			title
 		};
+	},
+	computed: {
+		isDashboard () {
+			return this.$route.path === "/";
+		}
+	},
+	methods: {
+		reload () {
+			this.$router.push({
+				path: this.$route.path,
+				query: {
+					...this.$route.query,
+					reload: Date.now()
+				}
+			});
+		}
 	}
 };
 </script>

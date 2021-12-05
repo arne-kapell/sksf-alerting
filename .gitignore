@@ -39,6 +39,7 @@ node_modules/
 jspm_packages/
 .yarn/cache/
 .yarn/install-state.gz
+.pnp.*
 
 # TypeScript v1 declaration files
 typings/
@@ -95,3 +96,4 @@ sw.*
 .dccache
 .DS_Store
 .editorconfig
+.husky/.gitignore

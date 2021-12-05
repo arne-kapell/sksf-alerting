@@ -3,13 +3,15 @@
             <v-main fluid>
                 <v-container>
                     <v-card shaped :loading="loading">
-                        <v-form v-model="form.valid" @submit="login">
+                        <v-form v-model="form.valid" @submit="register">
                             <v-container>
-								<h1 class="text-h2" style="text-align: center;">Login</h1>
+								<h1 class="text-h2" style="text-align: center;">Register</h1>
                                 <v-text-field type="text" v-model="form.email" label="E-Mail" :rules="form.emailRules" required />
+                                <v-text-field type="text" v-model="form.name" label="Name" :rules="form.nameRules" />
+                                <v-checkbox type="checkbox" v-model="form.privileged" label="Privileged" required />
                                 <v-text-field type="password" v-model="form.password" label="Password" :rules="form.pwRules" required />
 								<v-row class="d-flex flex-row justify-center my-2">
-									<v-btn type="submit" :disabled="!form.valid" color="green">login</v-btn>
+									<v-btn type="submit" :disabled="!form.valid" color="green">register</v-btn>
 									<v-alert v-if="error" type="error">{{ error }}</v-alert>
 								</v-row>
                             </v-container>
@@ -26,7 +28,7 @@ export default Vue.extend({
 	layout: "main",
 	head() {
 		return {
-			title: "Login",
+			title: "Register",
 		};
 	},
 	data() {
@@ -44,21 +46,37 @@ export default Vue.extend({
 				pwRules: [
 					(v: string) => !!v || "Password is required",
 					(v: string) => v.length >= 6 || "Password must be at least 6 characters",
-				]
+				],
+				name: "",
+				nameRules: [
+					(v: string) => !!v || "Name is required",
+					// eslint-disable-next-line no-useless-escape
+					(v: string) => /.+\ .+/.test(v) || "Name must be valid",
+				],
+				privileged: false
 			}
 		};
 	},
 	methods: {
-		async login(e: Event) {
+		async register(e: Event) {
 			e.preventDefault();
 			this.loading = true;
 			try {
-				await this.$auth.loginWith("local", {
-					data: {
-						mail: this.form.email,
-						password: this.form.password
-					}
-				});
+				const req = {
+					mail: this.form.email,
+					password: this.form.password,
+					name: this.form.name,
+					privileged: this.form.privileged
+				};
+				const res = await this.$axios.$post("/register", req);
+				if (res.success) {
+					this.form.email = "";
+					this.form.name = "";
+					this.form.privileged = false;
+					this.form.password = "";
+				} else {
+					console.log("Failed to register user");
+				}
 			} catch (e) {
 				const message = (e as ErrorEvent).message.split(" ");
 				this.error = message[message.length - 1];

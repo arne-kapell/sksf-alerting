@@ -1,26 +1,31 @@
 <template>
   <nav class="d-flex flex-grow-1 align-center">
-      <v-toolbar-title class="text--center" >
-        <span>{{ title }}</span>
-      </v-toolbar-title>
-      <v-spacer />
-      <v-chip color="green" class="mr-2">
-      <v-icon left>mdi-account-circle-outline</v-icon>
-        {{ user.mail }}
+    <v-toolbar-title class="text--center text-h3">
+      <span>{{ title }}</span>
+    </v-toolbar-title>
+    <v-spacer />
+    <v-badge dot overlap bordered :color="socketStatus ? 'success' : 'warning' " class="mr-2">
+      <v-chip color="green">
+        <v-icon left>mdi-account-circle-outline</v-icon>
+        {{ (user.name) || user.mail }}
       </v-chip> 
+    </v-badge>
     <v-btn @click="logout()" color="error" id="NavBarBtn">
-        <span>Logout</span>
-      </v-btn>
-      <!-- <v-avatar color="primary" size="45"> -->
-      <!-- {{ user.mail[0]  + "@" + user.mail.split('@')[0][0] }}
-    </v-avatar> -->
-</nav>  
+      <span>Logout</span>
+    </v-btn>
+  </nav>  
 </template>
 
 <script lang="ts">
+import { Auth } from "@nuxtjs/auth-next";
 import Vue from "vue";
 export default Vue.extend({
-	components: {},
+	props: {
+		socketStatus: {
+			type: Boolean,
+			default: false
+		}
+	},
 	data() {
 		return {
 			title: "SKS-F",
@@ -29,13 +34,12 @@ export default Vue.extend({
 	methods: {
 		async logout(){
 			await this.$auth.logout();
-			this.$router.push("/login");
 		},		
 	},
 	computed:{
 		user() {
-			return this.$auth.user;
-		},
+			return (this.$auth as Auth).user;
+		}
 	},
 });
 </script>

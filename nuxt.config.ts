@@ -75,8 +75,7 @@ const config: NuxtConfig = {
 		sockets: [
 			{
 				name: "alarms",
-				// url: "http://localhost:3000/api/socket.io",
-				url: "http://localhost:3001",
+				url: (process.env.NODE_ENV === "development") ? "http://localhost:3001" : "https://sks-f.herokuapp.com",
 				default: true,
 				vuex: {
 					actions: [
@@ -103,7 +102,7 @@ const config: NuxtConfig = {
 	vuetify: {
 		customVariables: ["~/assets/variables.scss"],
 		theme: {
-			light: false,
+			dark: true,
 			default: "dark",
 			// maybe use theme generator: https://theme-generator.vuetifyjs.com/
 			themes: {

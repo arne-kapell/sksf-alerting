@@ -1,345 +1,301 @@
+<script>
+/* eslint-disable vue/valid-v-slot */
+</script>
 <template>
-  <div class="v-container col-6"
-       id="alert-list-sheet"
-  >
-    <v-sheet
-    color="white"
-    elevation="5"
-    >
-      <template>
-        <!-- Data Table -->
-        <v-data-table
-          :headers="headers"
-          :items="alarms"
-          class="elevation-1"
-        >
+<v-container>
+    <v-card elevation="10">
+		<template>
+			<!-- Data Table -->
+			<v-data-table
+			:headers="headers"
+			:items="alarms"
+			:search="search"
+			class="elevation-1"
+			>
 
-          <!-- Farbe des Risikos -->
-      <template v-slot:item.risk="item">
-            <v-chip
-              :color="getColor(item.value)"
-              light
-              dark
-            >
-              {{item.value}}
-            </v-chip>
-          </template>
+				<!-- source Template -->
+				<template v-slot:item.source="{ item }">
+					<v-list-item-content style="width: min-content;">
+						<v-chip label color="accent">
+							{{ item.source }}
+						</v-chip>
+					</v-list-item-content>
+				</template>
 
-          <!-- Zeitpunktdarstellung-->
+				<!-- api Template -->
+				<template v-slot:item.api="{ item }">
+					<v-list-item-content style="width: min-content;">
+						<v-chip label>
+							{{ item.api }}
+						</v-chip>
+					</v-list-item-content>
+				</template>
 
-          <template v-slot:item.datetime="item">
-              {{item.value = parseZeitpunkt(item.value)}}
-          </template>
+				<!-- Farbe des Risikos -->
+				<template v-slot:item.risk="item">
+					<v-list-item-content style="text-align: center; width: min-content">
+						<v-chip
+							:color="getColor(item.value)"
+							>
+							<span>{{item.value}}</span>
+						</v-chip>
+					</v-list-item-content>
+				</template>
 
-          <template v-slot:top>
-            <v-toolbar
-              flat
-            >
-              <v-toolbar-title>Überblick</v-toolbar-title>
-              <v-divider
-                class="mx-4"
-                inset
-                vertical
-              ></v-divider>
-              <v-spacer></v-spacer>
-              <v-dialog
-                v-model="dialog"
-                max-width="500px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    color="accent"
-                    light
-                    class="mb-2"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    +
-                  </v-btn>
-                </template>
-                <v-card>
-                  <v-card-title>
-                    <span class="text-h5">{{ formTitle }}</span>
-                  </v-card-title>
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col id='colAlarmListe'
-                          cols="12"
-                          sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            v-model="editedItem.datetime"
-                            label="Zeitpunkt"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            v-model="editedItem.risk"
-                            label="Risiko (%)"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col
-                          cols="12"
-                          sm="6"
-                          md="4"
-                        >
-                          <v-text-field
-                            v-model="editedItem.source"
-                            label="Handlungsbedarf"
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
+				<!-- Zeitpunktdarstellung-->
+				<template v-slot:item.datetime="item">
+					{{item.value = parseZeitpunkt(item.value)}}
+				</template>
 
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="accent"
-                      text
-                      @click="close"
-                    >
-                      Cancel
-                    </v-btn>
-                    <v-btn
-                      color="accent"
-                      text
-                      @click="save"
-                    >
-                      Save
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-dialog v-model="dialogDelete" max-width="500px">
-                <v-card>
-                  <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="accent" text @click="closeDelete">Cancel</v-btn>
-                    <v-btn color="accent" text @click="deleteItemConfirm">OK</v-btn>
-                    <v-spacer></v-spacer>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-toolbar>
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-btn
-              small
-              class="mr-2"
-              @click="getInformation(item)"
-            >
-              Information
-            </v-btn>
-            <v-icon
-              small
-              class="mr-2"
-              @click="editItem(item)"
-            >
-              mdi-pencil
-            </v-icon>
-            <v-icon
-              small
-              @click="deleteItem(item)"
-            >
-              mdi-delete
-            </v-icon>
-          </template>
-        </v-data-table>
-      </template>
-    </v-sheet>
-  </div>
+				<template v-slot:top="item">
+					<v-toolbar flat style="background-color: transparent;">
+						<v-toolbar-title>Überblick</v-toolbar-title>
+						<v-spacer />
+						<v-container class="d-flex justify-end align-center mr-0 mt-1" style="width: min-content;">
+							<v-progress-circular :rotate="-90" v-if="stats.high" :value="stats.high / stats.total * 100" color="orange" :size="50" class="mx-1">{{ stats.high }}</v-progress-circular>
+							<v-progress-circular :rotate="-90" v-if="stats.critical" :value="stats.critical / stats.total * 100" color="red" :size="50" class="mx-1">{{ stats.critical }}</v-progress-circular>
+						</v-container>
+						<v-container style="width: 20%;">
+							<v-text-field
+								v-model="search"
+								append-icon="mdi-magnify"
+								label="Search alerts"
+								single-line
+								hide-details
+								color="accent"
+								clearable
+								/>
+						</v-container>
+					</v-toolbar>
+
+					<v-dialog
+						v-model="dialogChecklist"
+						width="500"
+						>
+						<v-card :loading="loadingProgress">
+							<v-card-title class="text-h5 accent">
+								<span>Checklist: <b>{{ currentChecklist.name }}</b></span>
+								<v-chip label class="ml-auto">{{ currentChecklist.source }}</v-chip>
+							</v-card-title>
+
+							<v-card-text>
+								<v-list subheader>
+									<!-- <v-subheader>Recent chat</v-subheader> -->
+
+									<v-list-item
+										v-for="action in currentChecklist.actions"
+										:key="action.uid"
+									>
+										<template v-slot:default>
+											<v-list-item-content>
+												<v-list-item-title>{{ action.name }}</v-list-item-title>
+												<v-list-item-subtitle>{{ action.function + ((action.info) ? '(' + action.info + ')' : '') }}</v-list-item-subtitle>
+											</v-list-item-content>
+
+											<v-list-item-action>
+											<v-checkbox
+												:input-value="action.done"
+												@change="setProgress(currentChecklist, action, !action.done)"
+												color="accent"
+											/>
+											</v-list-item-action>
+										</template>
+									</v-list-item>
+								</v-list>
+							</v-card-text>
+
+							<v-divider></v-divider>
+
+							<v-card-actions>
+							<v-spacer></v-spacer>
+							<v-btn
+								color="red"
+								text
+								@click="closeChecklist"
+							>
+							Close
+							</v-btn>
+							</v-card-actions>
+						</v-card>
+						</v-dialog>
+
+					<v-dialog v-model="dialogDelete" max-width="500px">
+						<v-card>
+						<v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+						<v-card-actions>
+							<v-spacer></v-spacer>
+							<v-btn color="accent" text @click="closeDelete">Cancel</v-btn>
+							<v-btn color="accent" text @click="deleteItemConfirm">OK</v-btn>
+							<v-spacer></v-spacer>
+						</v-card-actions>
+						</v-card>
+					</v-dialog>
+				</template>
+ 
+				<template v-slot:item.actions="{ item }">
+					<v-list-item-content>
+						<v-container>
+							<v-btn
+								small
+								class="mr-2"
+								:disabled="!item.checklistId"
+								@click="openChecklist(item.uid)"
+									:color="(!checklists[alarms.indexOf(item)] || !checklists[alarms.indexOf(item)].actions) ? '' : (!item.progress) ? 'error' : (item.progress < checklists[alarms.indexOf(item)].actions.length) ? 'warning' : 'green'"
+								>
+								Checklist
+							</v-btn>
+						</v-container>
+					</v-list-item-content>
+				</template>
+
+				<template v-slot:item.progressPercent="{ item }">
+					<v-list-item-content style="text-align: center;">
+						{{ item.value = (typeof progressPercents[alarms.indexOf(item)] === "number") ? Number(progressPercents[alarms.indexOf(item)]) : "/" }}
+					</v-list-item-content>
+				</template>
+
+			</v-data-table>
+		</template>
+    </v-card>
+</v-container>
 </template>
 
 
-<script>
+<script lang="ts">
+/* eslint-disable vue/valid-v-slot */
 import Vue from "vue";
 export default Vue.extend({
 	data () {
 		return {
 			headers: [
-				{
-					text: "ALERTNAME",
-					align: "start",
-					sortable: false,
-					value: "message",
-				},
-				{text: "RISIKO", value: "risk"},
-				{text: "ZEITPUNKT ", value: "datetime"},
-				{text: "DETAILS", value: "actions", sortable: false},
-			],
-			desserts: [
-				{
-					alertname: "Frozen Yogurt",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 54,
-				},
-				{
-					alertname: "Ice cream sandwich",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 64,
-				},
-				{
-					alertname: "Eclair",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 91,
-				},
-				{
-					alertname: "Cupcake",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 15,
-				},
-				{
-					alertname: "Gingerbread",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 12,
-				},
-				{
-					alertname: "Jelly bean",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 18,
-				},
-				{
-					alertname: "Lollipop",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 18,
-				},
-				{
-					alertname: "Honeycomb",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 91,
-
-				},
-				{
-					alertname: "Donut",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 11,
-				},
-				{
-					alertname: "KitKat",
-					zeitpunkt: 159,
-					handlungsbedarf: 24,
-					details: 4.0,
-					risiko: 51,
-				},
+				{ text: "Alert", align: "start", sortable: false, value: "message" },
+				{ text: "Risk", value: "risk" },
+				{ text: "Timestamp ", value: "datetime" },
+				{ text: "Module", value: "source" },
+				{ text: "Source", value: "api" },
+				{ text: "Actions", value: "actions", align: "end", sortable: false},
+				{ text: "Progress (%)", value: "progressPercent", align: "end"},
 			],
 			editedIndex: -1,
 			editedItem: {
-				message: "",
-				risk: 0,
-				source: 0,
-			},
+			} as Checklist,
 			defaultItem: {
 				message: "",
 				risk: 0,
 				source: 0,
 			},
+			// checklists: [] as (Checklist | false)[],
+			dialogChecklist: false,
+			currentChecklist: {} as Checklist,
+			search: "" as string,
+			// progressPercents: [] as (number | false)[],
+			loadingProgress: false
 		};
 	},
 
 	methods: {
-		parseZeitpunkt(date){
-			date = date.split("T");
-			var zeit = date[1].split(".");
-			return   date[0] + " " + zeit[0];
+		parseZeitpunkt(date: string) {
+			const ts = new Date(date);
+			return ts.toLocaleString("de-DE", {
+				day: "numeric",
+				month: "short",
+				year: "numeric",
+				hour: "numeric",
+				minute: "2-digit",
+				second: undefined
+			});
 		},
-		getColor (risiko) {
-			if (risiko > 75) return "red";
-			else if (risiko > 50) return "orange";
+		getColor (risk: number) {
+			if (risk > 75) return "red";
+			else if (risk >= 50) return "orange";
 			else return "green";
 		},
-		editItem (item) {
-			this.editedIndex = this.desserts.indexOf(item);
-			this.editedItem = Object.assign({}, item);
-			this.dialog = true;
+		openChecklist(uid: number, openNew=true) {
+			const index = this.alarms.findIndex(item => item.uid === uid);
+			this.currentChecklist = this.checklists[index] || {} as Checklist;
+			if (openNew) this.dialogChecklist = true;
 		},
-
-		getInformation(item) {
-			this.editedIndex = this.desserts.indexOf(item);
-			this.editedItem = Object.assign({}, item);
-		},
-
-		deleteItem (item) {
-			this.editedIndex = this.desserts.indexOf(item);
-			this.editedItem = Object.assign({}, item);
-			this.dialogDelete = true;
-		},
-
-		deleteItemConfirm () {
-			this.desserts.splice(this.editedIndex, 1);
-			this.closeDelete();
-		},
-
-		close () {
-			this.dialog = false;
-			this.$nextTick(() => {
-				this.editedItem = Object.assign({}, this.defaultItem);
-				this.editedIndex = -1;
+		async setProgress(checklist: Checklist, action: ActionType, active: boolean) {
+			this.loadingProgress = true;
+			const progress = (active) ? checklist.actions.indexOf(action) + 1 : checklist.actions.indexOf(action);
+			const alarm = this.alarms[this.checklists.indexOf(checklist)];
+			console.log(alarm.uid, progress, active);
+			const res = await this.$axios.$put("/alarms/progress", {
+				uid: alarm.uid,
+				progress: progress,
 			});
-		},
-
-		closeDelete () {
-			this.dialogDelete = false;
-			this.$nextTick(() => {
-				this.editedItem = Object.assign({}, this.defaultItem);
-				this.editedIndex = -1;
-			});
-		},
-
-		save () {
-			if (this.editedIndex > -1) {
-				Object.assign(this.desserts[this.editedIndex], this.editedItem);
-			} else {
-				this.desserts.push(this.editedItem);
+			console.log(res);
+			if (res.success) {
+				this.checklists[this.alarms.indexOf(alarm)] = res.data;
+				this.progressPercents[this.alarms.indexOf(alarm)] = (active) ? (progress / checklist.actions.length) * 100 : false;
 			}
-			this.close();
+			this.loadingProgress = false;
+			this.$store.dispatch("getAlarms");
+			setTimeout(() => {
+				this.openChecklist(alarm.uid, false);
+			}, 500);
 		},
-	},
+		closeChecklist () {
+			this.dialogChecklist = false;
+			this.$nextTick(() => {
+				this.currentChecklist = {} as Checklist;
+			});
+		},
 
+		// async calculateLists(alarms: Alarm[]) {
+		// 	const asyncForEach = async (array: any[], callback: (item: any, index: number, array: any[]) => Promise<void>) => {
+		// 		for (let index = 0; index < array.length; index++) {
+		// 			await callback(array[index], index, array);
+		// 		}
+		// 	};
+		// 	const uids: number[] = alarms.map((alarm: Alarm) => alarm.checklistId | 0);
+		// 	const checklists: (Checklist | false)[] = [];
+		// 	const progressPercents: (number | false)[] = [];
+		// 	await asyncForEach(uids, async (uid: number, i: number) => {
+		// 		if (uid) {
+		// 			const res = await this.$axios.get("/checklist/" + uid);
+		// 			const checklist = res.data as Checklist;
+		// 			checklist.actions = checklist.actions.map((action: ActionType, index: number) => ({
+		// 				...action,
+		// 				done: index < alarms[i].progress
+		// 			}));
+		// 			checklists.push(checklist);
+		// 			progressPercents.push(Math.round(alarms[i].progress / res.data.actions.length * 100) | 0);
+		// 		} else {
+		// 			checklists.push(false);
+		// 			progressPercents.push(false);
+		// 		}
+		// 	});
+		// 	this.checklists = checklists;
+		// 	this.progressPercents = progressPercents;
+		// }
+	},
 	computed: {
-		formTitle () {
-			return this.editedIndex === -1 ? "New Item" : "Edit Item";
-		},
 		alarms() {
 			return this.$store.state.alarms;
 		},
+		checklists() {
+			return this.$store.state.checklists;
+		},
+		progressPercents() {
+			return this.$store.state.progressPercents;
+		},
+		stats() {
+			return {
+				total: this.$store.state.alarms.length,
+				critical: this.$store.state.alarms.filter((a: Alarm) => a.risk > 75).length,
+				high: this.$store.state.alarms.filter((a: Alarm) => a.risk >= 50 && a.risk <= 75).length,
+				medium: this.$store.state.alarms.filter((a: Alarm) => a.risk < 50).length
+			};
+		}
 	},
-
+	async mounted() {
+		this.$store.dispatch("getChecklistWithPP");
+	},
 	watch: {
-		dialog (val) {
-			val || this.close();
-		},
-		dialogDelete (val) {
-			val || this.closeDelete();
-		},
-	},
+		async alarms (alarms) {
+			this.$store.dispatch("getChecklistWithPP");
+		}
+	}
 });
 </script>
-
-<style scoped>
-</style>

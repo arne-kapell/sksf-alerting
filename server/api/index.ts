@@ -75,7 +75,7 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
 };
 
 // Middleware for starting socket.io server
-app.use(async (req, res, next) => {
+app.use(async (req: Request, res: Response, next: NextFunction) => {
 	if (!io) {
 		const running = await portUsed.check(3001);
 		if (running) {
@@ -90,9 +90,9 @@ app.use(async (req, res, next) => {
 
 			io.path("/socket.io");
 			console.info("Started socket.io server");
-		
+	
 			io.use(socketAuth);
-		
+	
 			io.on("connection", async (socket) => {
 				socket.join("alarms");
 				console.log("Client connected | sockets:", await io?.allSockets());
@@ -106,7 +106,7 @@ app.use(async (req, res, next) => {
 });
 
 // Authentication endpoints
-app.post("/login", async (req, res) => {
+app.post("/login", async (req: Request, res: Response) => {
 	const { mail, password } = req.body;
 	const user = await User.findOne({ where: { mail } });
 	const isValid = user && await compare(password, user.get("pwdHash"));
@@ -123,31 +123,29 @@ app.post("/login", async (req, res) => {
 		res.status(401).json({ error: (!user) ? "Unknown mail" : "Invalid password" });
 	}
 });
-app.post("/register", async (req, res) => {
-	const { mail, password, name } = req.body;
-	const user = await User.findOne({ where: { mail } });
-	if (user) {
-		res.status(400).json({ error: "Mail already in use" });
+app.post("/register", expressAuth, async (req: Request, res: Response) => {
+	const { mail, password, name, privileged } = req.body;
+	const currentUser = res.locals.user as User;
+	if (currentUser.privileged) {
+		const user = await User.findOne({ where: { mail } });
+		if (user) {
+			res.status(400).json({ error: "Mail already in use" });
+		} else {
+			const saltRounds = Math.floor(Math.random() * (10 - 5 + 1)) + 5;
+			const hashedPwd = await hash(password, saltRounds);
+			const newUser = await User.create({
+				mail,
+				name,
+				pwdHash: hashedPwd,
+				privileged: (privileged) || false
+			});
+			res.json({ success: true, uid: newUser.uid });
+		}
 	} else {
-		const saltRounds = Math.floor(Math.random() * (10 - 5 + 1)) + 5;
-		const hashedPwd = await hash(password, saltRounds);
-		const newUser = await User.create({
-			mail,
-			name,
-			pwdHash: hashedPwd,
-			privileged: false
-		});
-		res.json({
-			token: sign({
-				uid: newUser?.uid,
-				name: newUser?.name,
-				mail: newUser?.mail,
-				privileged: newUser?.privileged,
-			}, tokenSecret, { expiresIn: "1h" })
-		});
+		res.status(401).json({ error: "User not permitted" });
 	}
 });
-app.get("/user-info", expressAuth, async (req, res) => {
+app.get("/user-info", expressAuth, async (req: Request, res: Response) => {
 	const user = res.locals.user as User;
 	res.json({
 		user: {
@@ -162,50 +160,78 @@ app.get("/user-info", expressAuth, async (req, res) => {
 // Helper function to notify ui via socket.io and passengers via information system api about new alarms
 const notify = async (alarm: Alarm) => {
 	io?.emit("alarm");
-	try {
-		await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
-			level: (alarm.risk <= 50) ? "info" : "warning",
-			message: alarm.message
-		}], {
-			withCredentials: true,
-			auth: {
-				username: "tinf19cs",
-				password: process.env.API_PASSWORD
-			} as AxiosBasicCredentials
-		});
-	} catch (e) {
-		console.error("Error sending alarm to 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+	const message = mapAlarmToPassengerNotification(alarm);
+	if (message) {
+		try {
+			await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
+				level: (alarm.risk <= 50) ? "info" : "warning",
+				message: message
+			}], {
+				withCredentials: true,
+				auth: {
+					username: "tinf19cs",
+					password: process.env.API_PASSWORD
+				} as AxiosBasicCredentials
+			});
+		} catch (e) {
+			console.error("Error sending alarm to 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+		}
 	}
+};
+const mapAlarmToPassengerNotification = (alarm: Alarm): string | false => {
+	const dict: {[key in Source]: string | false} = {
+		"DDOS-Detector": "Our IT systems are experiencing an unusually high load at the moment. You might experience some problems.",
+		AccountBruteforceChecker: false,
+		OverloadModule: "Our IT systems are experiencing an unusually high load at the moment. You might experience some problems.",
+		RadarChecker: false,
+		TerminalForwarder: false,
+		flightplanChecker: false
+	};
+	return dict[alarm.source];
 };
 
 // Realtime alarm endpoint for analysis modules
-app.post("/realtime-alarm", async (req, res) => {
-	const mapAlarm = (a: Alarm) => {
-		return {
-			api: a.api,
-			risk: a.risk,
-			source: a.source,
-			message: a.message,
-		};
-	};
+app.post("/realtime-alarm", async (req: Request, res: Response) => {
 	const { alarm } = req.body;
 	let uid: number | boolean = false;
 	if (alarm.uid) {
 		const existing = await Alarm.findOne({ where: { uid: alarm.uid } });
 		if (existing) {
-			uid = (await existing.update(mapAlarm(alarm))).get("uid");
+			uid = (await existing.update(alarm)).get("uid");
 		} else {
-			uid = (await Alarm.create(mapAlarm(alarm))).uid;
+			uid = (await Alarm.create(alarm)).uid;
 		}
 	} else {
-		uid = (await Alarm.create(mapAlarm(alarm))).uid;
+		uid = (await Alarm.create(alarm)).uid;
 	}
-	res.json({ success: true, uid: uid });
+	const inDb = await Alarm.findByPk(uid);
+	const checklist = await Checklist.findOne({ where: { source: inDb.get("source") } });
+	if (checklist) {
+		const checklistId = checklist.get("uid");
+		inDb.set({
+			checklistId
+		});
+	}
+	const final = await inDb.save();
+	res.json({ success: true, uid: (final.uid) | final.get("uid"), checklistId: final.get("checklistId") });
 	notify(alarm);
 });
 
+// Endpoint for setting progress on alarms
+app.put("/alarms/progress", expressAuth, async (req: Request, res: Response) => {
+	const { uid, progress } = req.body;
+	const alarm = await Alarm.findOne({ where: { uid } });
+	if (alarm) {
+		alarm.set({ progress });
+		const final = await alarm.save();
+		res.json({ success: true, uid: final.get("uid"), progress: final.get("progress") });
+	} else {
+		res.status(404).json({ error: "Alarm not found" });
+	}
+});
+
 // Alarm endpoint for ui
-app.get("/alarms/:limit", expressAuth, async (req, res) => {
+app.get("/alarms/:limit", expressAuth, async (req: Request, res: Response) => {
 	const { limit } = req.params;
 	const alarms = await Alarm.findAll({
 		order: [["uid", "ASC"]],
@@ -219,13 +245,14 @@ app.get("/alarms/:limit", expressAuth, async (req, res) => {
 			source: a.get("source"),
 			message: a.get("message"),
 			checklistId: a.get("checklistId"),
+			progress: a.get("progress"),
 			datetime: a.get("updatedAt")
 		}))
 	});
 });
 
 // Endpoint for high-level passenger information
-app.get("/passenger/information", async (req, res) => {
+app.get("/passenger/information", async (req: Request, res: Response) => {
 	const alarms = await Alarm.findAll({
 		order: [["updatedAt", "DESC"]],
 		limit: 100
@@ -246,7 +273,7 @@ app.get("/passenger/information", async (req, res) => {
 });
 
 // Endpoints for checklist management
-app.get("/checklist/:uid", expressAuth, async (req, res) => {
+app.get("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
 	const checklist = await Checklist.findByPk(cUid, {
 		include: [{ model: Action, as: "Actions" }]
@@ -258,36 +285,59 @@ app.get("/checklist/:uid", expressAuth, async (req, res) => {
 			uid: checklist.get("uid"),
 			name: checklist.get("name"),
 			source: checklist.get("source"),
-			progress: checklist.get("progress"),
 			actions: checklist.get("Actions").map((a: Action) => ({
 				uid: a.get("uid"),
-				content: a.get("content")
+				name: a.get("name"),
+				function: a.get("function"),
+				responsiblePerson: a.get("responsiblePerson"),
+				info: a.get("info")
 			}))
 		});
 	}
 });
-app.post("/checklist", expressAuth, async (req, res) => {
+// Endpoint for getting all checklists
+app.get("/checklists", expressAuth, async (req: Request, res: Response) => {
+	const checklists = await Checklist.findAll({
+		include: [{ model: Action, as: "Actions" }]
+	});
+	res.json({
+		checklists: checklists.map((c: Checklist) => ({
+			uid: c.get("uid"),
+			name: c.get("name"),
+			source: c.get("source"),
+			actions: c.get("Actions").map((a: Action) => ({
+				uid: a.get("uid"),
+				name: a.get("name"),
+				function: a.get("function"),
+				responsiblePerson: a.get("responsiblePerson"),
+				info: a.get("info")
+			}))
+		}))
+	});
+});
+
+app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 	const { name, source, actions } = req.body;
 	await asyncForEach(actions, async (a: ActionType, i: number) => {
 		if (!a.uid) {
 			actions[i] = await Action.create({
-				content: a.content
+				name: a.name,
+				function: a.function,
+				responsiblePerson: a.responsiblePerson,
+				info: a.info
 			});
 		} else {
-			actions[i] = Action.findByPk(a.uid);
+			actions[i] = await Action.findByPk(a.uid);
 		}
 	});
 	const checklist = await Checklist.create({
 		name,
-		source,
-		Actions: actions
-	}, {
-		include: [ { model: Action, as: "Actions" } ]
+		source
 	});
 	await asyncForEach(actions, async (a: Action) => {
 		await ChecklistAction.create({
 			checklistId: checklist.uid,
-			actionId: a.uid
+			actionId: (a.uid) | a.get("uid")
 		});
 	});
 	const final = await Checklist.findByPk(checklist.uid, {
@@ -299,38 +349,72 @@ app.post("/checklist", expressAuth, async (req, res) => {
 			uid: final?.get("uid"),
 			name: final?.get("name"),
 			source: final?.get("source"),
-			progress: final?.get("progress"),
 			actions: final?.get("Actions").map((a: Action) => ({
 				uid: a.get("uid"),
-				content: a.get("content")
+				name: a.get("name"),
+				function: a.get("function"),
+				responsiblePerson: a.get("responsiblePerson"),
+				info: a.get("info")
 			}))
 		}
 	});
 });
-app.put("/checklist/:uid", expressAuth, async (req, res) => {
+app.put("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
-	const { name, source, progress } = req.body;
-	const checklist = await Checklist.findByPk(cUid);
+	const { name, source, actions } = req.body;
+	const checklist = await Checklist.findByPk(cUid, {
+		include: [ { model: Action, as: "Actions" } ]
+	});
 	if (!checklist) {
 		res.status(404).json({ error: "Checklist not found" });
 	} else {
+		await asyncForEach(actions, async (a: ActionType, i: number) => {
+			if (!a.uid) {
+				actions[i] = await Action.create({
+					name: a.name,
+					function: a.function,
+					responsiblePerson: a.responsiblePerson,
+					info: a.info
+				});
+			} else {
+				actions[i] = await Action.findByPk(a.uid);
+			}
+		});
 		await checklist.update({
 			name,
-			source,
-			progress
+			source
+		});
+		const relations = await ChecklistAction.findAll({ where: { checklistId: cUid } });
+		const relationsToDelete = relations.filter((r: ChecklistAction) => actions.map((a: Action) => a.get("uid")).indexOf(r.actionId) === -1);
+		await asyncForEach(relationsToDelete, async (r: ChecklistAction) => await r.destroy());
+		const relationsToCreate = actions.filter((a: Action) => relations.map((r: ChecklistAction) => r.get("actionId")).indexOf(a.uid) === -1);
+		await asyncForEach(relationsToCreate, async (a: Action) => {
+			await ChecklistAction.create({
+				checklistId: cUid,
+				actionId: a.get("uid")
+			});
+		});
+		const final = await Checklist.findByPk(checklist.get("uid"), {
+			include: [ { model: Action, as: "Actions" } ]
 		});
 		res.json({
 			success: true,
 			checklist: {
-				uid: checklist.get("uid"),
-				name: checklist.get("name"),
-				source: checklist.get("source"),
-				progress: checklist.get("progress")
+				uid: final?.get("uid"),
+				name: final?.get("name"),
+				source: final?.get("source"),
+				actions: final?.get("Actions").map((a: Action) => ({
+					uid: a.get("uid"),
+					name: a.get("name"),
+					function: a.get("function"),
+					responsiblePerson: a.get("responsiblePerson"),
+					info: a.get("info")
+				}))
 			}
 		});
 	}
 });
-app.delete("/checklist/:uid", expressAuth, async (req, res) => {
+app.delete("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 	const cUid = Number(req.params.uid);
 	const checklist = await Checklist.findByPk(cUid);
 	console.log(checklist);
@@ -342,8 +426,8 @@ app.delete("/checklist/:uid", expressAuth, async (req, res) => {
 	}
 });
 
-// Endpoints for action management
-app.get("/actions/:limit", expressAuth, async (req, res) => {
+// Endpoint for action query
+app.get("/actions/:limit", expressAuth, async (req: Request, res: Response) => {
 	const { limit } = req.params;
 	const actions = await Action.findAll({
 		order: [["updatedAt", "DESC"]],
@@ -352,7 +436,10 @@ app.get("/actions/:limit", expressAuth, async (req, res) => {
 	res.json({
 		actions: actions.map((a: Action) => ({
 			uid: a.get("uid"),
-			content: a.get("content")
+			name: a.get("name"),
+			function: a.get("function"),
+			responsiblePerson: a.get("responsiblePerson"),
+			info: a.get("info")
 		}))
 	});
 });

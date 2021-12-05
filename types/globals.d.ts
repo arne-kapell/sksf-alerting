@@ -1,25 +1,29 @@
-declare type AlarmCategory = "ddos" | "server failure"
-
 declare type ActionType = {
     uid: number,
-    content: string
+    name?: string,
+    function?: string,
+    responsiblePerson?: string,
+    info?: string
 }
+
+declare type Source = "DDOS-Detector" | "AccountBruteforceChecker" | "flightplanChecker" | "OverloadModule" | "RadarChecker" | "TerminalForwarder"
 
 declare type Checklist = {
     uid: number,
     name: string,
-    source: string,
-    actions?: Action[],
-    progress: number
+    source: Source,
+    actions?: Action[]
 }
 
 declare type Alarm = {
     uid: number,
-    api: string,
     risk: number,
-    source: string,
+    api: string,
+    source: Source,
     checklistId: number,
-    message: string
+    progress: number,
+    message: string,
+    datetime: Date
 }
 
 declare type User = {
