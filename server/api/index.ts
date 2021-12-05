@@ -160,20 +160,34 @@ app.get("/user-info", expressAuth, async (req: Request, res: Response) => {
 // Helper function to notify ui via socket.io and passengers via information system api about new alarms
 const notify = async (alarm: Alarm) => {
 	io?.emit("alarm");
-	try {
-		await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
-			level: (alarm.risk <= 50) ? "info" : "warning",
-			message: alarm.message
-		}], {
-			withCredentials: true,
-			auth: {
-				username: "tinf19cs",
-				password: process.env.API_PASSWORD
-			} as AxiosBasicCredentials
-		});
-	} catch (e) {
-		console.error("Error sending alarm to 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+	const message = mapAlarmToPassengerNotification(alarm);
+	if (message) {
+		try {
+			await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
+				level: (alarm.risk <= 50) ? "info" : "warning",
+				message: message
+			}], {
+				withCredentials: true,
+				auth: {
+					username: "tinf19cs",
+					password: process.env.API_PASSWORD
+				} as AxiosBasicCredentials
+			});
+		} catch (e) {
+			console.error("Error sending alarm to 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+		}
 	}
+};
+const mapAlarmToPassengerNotification = (alarm: Alarm): string | false => {
+	const dict: {[key in Source]: string | false} = {
+		"DDOS-Detector": "Our IT systems are experiencing an unusually high load at the moment. You might experience some problems.",
+		AccountBruteforceChecker: false,
+		OverloadModule: "Our IT systems are experiencing an unusually high load at the moment. You might experience some problems.",
+		RadarChecker: false,
+		TerminalForwarder: false,
+		flightplanChecker: false
+	};
+	return dict[alarm.source];
 };
 
 // Realtime alarm endpoint for analysis modules
@@ -192,10 +206,12 @@ app.post("/realtime-alarm", async (req: Request, res: Response) => {
 	}
 	const inDb = await Alarm.findByPk(uid);
 	const checklist = await Checklist.findOne({ where: { source: inDb.get("source") } });
-	const checklistId = checklist.get("uid");
-	inDb.set({
-		checklistId
-	});
+	if (checklist) {
+		const checklistId = checklist.get("uid");
+		inDb.set({
+			checklistId
+		});
+	}
 	const final = await inDb.save();
 	res.json({ success: true, uid: (final.uid) | final.get("uid"), checklistId: final.get("checklistId") });
 	notify(alarm);
@@ -279,6 +295,27 @@ app.get("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 		});
 	}
 });
+// Endpoint for getting all checklists
+app.get("/checklists", expressAuth, async (req: Request, res: Response) => {
+	const checklists = await Checklist.findAll({
+		include: [{ model: Action, as: "Actions" }]
+	});
+	res.json({
+		checklists: checklists.map((c: Checklist) => ({
+			uid: c.get("uid"),
+			name: c.get("name"),
+			source: c.get("source"),
+			actions: c.get("Actions").map((a: Action) => ({
+				uid: a.get("uid"),
+				name: a.get("name"),
+				function: a.get("function"),
+				responsiblePerson: a.get("responsiblePerson"),
+				info: a.get("info")
+			}))
+		}))
+	});
+});
+
 app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 	const { name, source, actions } = req.body;
 	await asyncForEach(actions, async (a: ActionType, i: number) => {
@@ -295,15 +332,12 @@ app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 	});
 	const checklist = await Checklist.create({
 		name,
-		source,
-		Actions: actions
-	}, {
-		include: [ { model: Action, as: "Actions" } ]
+		source
 	});
 	await asyncForEach(actions, async (a: Action) => {
 		await ChecklistAction.create({
 			checklistId: checklist.uid,
-			actionId: a.uid
+			actionId: (a.uid) | a.get("uid")
 		});
 	});
 	const final = await Checklist.findByPk(checklist.uid, {

@@ -11,7 +11,7 @@ interface ActionAttributes {
 	createdAt?: Date;
 	updatedAt?: Date;
 }
-export type ActionInput = Optional<ActionAttributes, "responsiblePerson" | "info">
+export type ActionInput = Optional<ActionAttributes, "name" | "function" | "responsiblePerson" | "info">
 export type ActionOuput = Required<ActionAttributes>
 export class Action extends Model<ActionAttributes, ActionInput> implements ActionAttributes {
 	uid!: number;

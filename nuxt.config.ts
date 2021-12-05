@@ -75,7 +75,7 @@ const config: NuxtConfig = {
 		sockets: [
 			{
 				name: "alarms",
-				url: "http://localhost:3001",
+				url: (process.env.NODE_ENV === "development") ? "http://localhost:3001" : "https://sks-f.herokuapp.com",
 				default: true,
 				vuex: {
 					actions: [
