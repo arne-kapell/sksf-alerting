@@ -165,7 +165,7 @@ const notify = async (alarm: Alarm) => {
 		try {
 			await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
 				level: (alarm.risk <= 50) ? "info" : "warning",
-				message: alarm.message
+				message: message
 			}], {
 				withCredentials: true,
 				auth: {
