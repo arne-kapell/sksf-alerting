@@ -295,6 +295,27 @@ app.get("/checklist/:uid", expressAuth, async (req: Request, res: Response) => {
 		});
 	}
 });
+// Endpoint for getting all checklists
+app.get("/checklists", expressAuth, async (req: Request, res: Response) => {
+	const checklists = await Checklist.findAll({
+		include: [{ model: Action, as: "Actions" }]
+	});
+	res.json({
+		checklists: checklists.map((c: Checklist) => ({
+			uid: c.get("uid"),
+			name: c.get("name"),
+			source: c.get("source"),
+			actions: c.get("Actions").map((a: Action) => ({
+				uid: a.get("uid"),
+				name: a.get("name"),
+				function: a.get("function"),
+				responsiblePerson: a.get("responsiblePerson"),
+				info: a.get("info")
+			}))
+		}))
+	});
+});
+
 app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 	const { name, source, actions } = req.body;
 	await asyncForEach(actions, async (a: ActionType, i: number) => {
