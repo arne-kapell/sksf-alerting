@@ -49,7 +49,7 @@
 
 				<template v-slot:top="item">
 					<v-toolbar flat style="background-color: transparent;">
-						<v-toolbar-title>Überblick</v-toolbar-title>
+						<v-toolbar-title>Dashboard</v-toolbar-title>
 						<v-spacer />
 						<v-container class="d-flex justify-end align-center mr-0 mt-1" style="width: min-content;">
 							<v-progress-circular :rotate="-90" v-if="stats.high" :value="stats.high / stats.total * 100" color="orange" :size="50" class="mx-1">{{ stats.high }}</v-progress-circular>

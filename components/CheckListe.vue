@@ -6,12 +6,12 @@
     :headers="headers"
     :items="checklists"
     :items-per-page="5"
+    :loading="loading"
     class="elevation-1"
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>Kriesenwerkzeuge</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
+        <v-toolbar-title>Checklists</v-toolbar-title>
       </v-toolbar>
       <v-dialog v-model="dialogChecklist" width="500">
         <v-card>
@@ -74,14 +74,15 @@ export default {
   data() {
     return {
       headers: [
-        { text: "NAME", align: "start", value: "name" },
-        { text: "ACTION COUNT", value: "actionCount" },
-        { text: "MODULE", value: "source" },
-        { text: "ACTIONS", value: "actions" },
+        { text: "Name", align: "start", value: "name" },
+        { text: "Action count", value: "actionCount" },
+        { text: "Module", value: "source" },
+        { text: "Actions", value: "actions" },
       ],
 	  dialogChecklist: false,
 	  currentChecklist: {} as Checklist,
 	  checklists: [] as Checklist[],
+    loading: true,
     };
   },
   methods: {
@@ -97,11 +98,12 @@ export default {
     },
   },
   async fetch() {
-	const res = await this.$axios.$get("/checklists");
-	this.checklists = res.checklists.map((c: Checklist) => ({
-		...c, 
-		actionCount: c.actions.length
-	}));
+    const res = await this.$axios.$get("/checklists");
+    this.checklists = res.checklists.map((c: Checklist) => ({
+      ...c, 
+      actionCount: c.actions.length
+    }));
+    this.loading = false;
   },
   mounted() {
 	  this.$fetch();
