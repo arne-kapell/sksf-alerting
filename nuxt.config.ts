@@ -102,7 +102,7 @@ const config: NuxtConfig = {
 	vuetify: {
 		customVariables: ["~/assets/variables.scss"],
 		theme: {
-			light: false,
+			dark: true,
 			default: "dark",
 			// maybe use theme generator: https://theme-generator.vuetifyjs.com/
 			themes: {
