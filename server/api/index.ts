@@ -179,20 +179,22 @@ const notify = async (alarm: Alarm) => {
 // Realtime alarm endpoint for analysis modules
 app.post("/realtime-alarm", async (req: Request, res: Response) => {
 	const { alarm } = req.body;
-	let inDb: Alarm | boolean = false;
+	let uid: number | boolean = false;
 	if (alarm.uid) {
 		const existing = await Alarm.findOne({ where: { uid: alarm.uid } });
 		if (existing) {
-			inDb = await existing.update(alarm);
+			uid = (await existing.update(alarm)).get("uid");
 		} else {
-			inDb = await Alarm.create(alarm);
+			uid = (await Alarm.create(alarm)).uid;
 		}
 	} else {
-		inDb = await Alarm.create(alarm);
+		uid = (await Alarm.create(alarm)).uid;
 	}
-	const checklist = await Checklist.findOne({ where: { source: alarm.source } });
+	const inDb = await Alarm.findByPk(uid);
+	const checklist = await Checklist.findOne({ where: { source: inDb.get("source") } });
+	const checklistId = checklist.get("uid");
 	inDb.set({
-		checklistId: checklist ? Number(checklist.get("uid")) : undefined
+		checklistId
 	});
 	const final = await inDb.save();
 	res.json({ success: true, uid: (final.uid) | final.get("uid"), checklistId: final.get("checklistId") });
