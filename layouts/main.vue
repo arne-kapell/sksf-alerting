@@ -26,8 +26,8 @@
 	<v-container class="alerts mr-3 mb-2">
 		<v-alert v-for="(a, i) in alerts" :key="i" :value="a.show | true" elevation="5" dense :type="a.type" :dismissible="a.dismissable | true" :transition="a.show ? 'scroll-x-reverse-transition' : 'scroll-x-transition'">{{ a.text }}</v-alert>
 	</v-container>
-    <v-footer :elevation="10" app class="d-flex justify-center" style="text-align: center;">
-      <span>Sicherheitskoordinationssystem für den Flugbetrieb (SKS-F) | &copy; {{ new Date().getFullYear() }} TINF20CS1</span>
+    <v-footer :elevation="10" app class="d-flex justify-center" style="text-align: center;" outlined>
+      <span class="text-overline">Sicherheitskoordinationssystem für den Flugbetrieb (SKS-F) | &copy; {{ new Date().getFullYear() }} TINF20CS1</span>
     </v-footer>
   </v-app>
 </template>

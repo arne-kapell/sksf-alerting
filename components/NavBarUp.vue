@@ -1,19 +1,19 @@
 <template>
   <nav class="d-flex flex-grow-1 align-center">
-      <v-toolbar-title class="text--center" >
-        <span>{{ title }}</span>
-      </v-toolbar-title>
-      <v-spacer />
-      <v-badge dot overlap bordered :color="socketStatus ? 'success' : 'error' " class="mr-2">
-        <v-chip color="green">
-          <v-icon left>mdi-account-circle-outline</v-icon>
-          {{ (user.name) || user.mail }}
-        </v-chip> 
-      </v-badge>
+    <v-toolbar-title class="text--center text-h3">
+      <span>{{ title }}</span>
+    </v-toolbar-title>
+    <v-spacer />
+    <v-badge dot overlap bordered :color="socketStatus ? 'success' : 'error' " class="mr-2">
+      <v-chip color="green">
+        <v-icon left>mdi-account-circle-outline</v-icon>
+        {{ (user.name) || user.mail }}
+      </v-chip> 
+    </v-badge>
     <v-btn @click="logout()" color="error" id="NavBarBtn">
-        <span>Logout</span>
-      </v-btn>
-</nav>  
+      <span>Logout</span>
+    </v-btn>
+  </nav>  
 </template>
 
 <script lang="ts">

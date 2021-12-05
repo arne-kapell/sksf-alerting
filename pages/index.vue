@@ -1,12 +1,14 @@
 <template>
-      <v-container fluid class="main-page">
-        <v-col class="col-2 pa-0">
-          <menu-side/>
-        </v-col>
-        <v-col class="col-7 offset-1">
-          <alarm-liste/>
-        </v-col>
-      </v-container>
+      <!-- <v-container fluid class="full-height"> -->
+        <v-row class="full-height" style="height: 100%">
+          <v-col class="col-2 pa-0">
+            <menu-side/>
+          </v-col>
+          <v-col class="col-10 my-4">
+            <alarm-liste/>
+          </v-col>
+        </v-row>
+      <!-- </v-container> -->
 </template>
 
 <script lang="ts">
@@ -43,9 +45,5 @@ body {
 #menu-side {
   padding: 0;
   gap: 0;
-}
-.col-6 {
-  max-width: 100%;
-  flex: 100%;
 }
 </style>

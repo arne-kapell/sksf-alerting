@@ -52,7 +52,7 @@ export default Vue.extend({
 					(v: string) => !!v || "Name is required",
 					(v: string) => /.+\ .+/.test(v) || "Name must be valid",
 				],
-                privileged: false
+				privileged: false
 			}
 		};
 	},
@@ -61,21 +61,21 @@ export default Vue.extend({
 			e.preventDefault();
 			this.loading = true;
 			try {
-                const req = {
-                    mail: this.form.email,
-                    password: this.form.password,
-                    name: this.form.name,
-                    privileged: this.form.privileged
-                };
-                const res = await this.$axios.$post("/register", req);
-                if (res.success) {
-                    this.form.email = "";
-                    this.form.name = "";
-                    this.form.privileged = false;
-                    this.form.password = "";
-                } else {
-                    console.log("Failed to register user");
-                }
+				const req = {
+					mail: this.form.email,
+					password: this.form.password,
+					name: this.form.name,
+					privileged: this.form.privileged
+				};
+				const res = await this.$axios.$post("/register", req);
+				if (res.success) {
+					this.form.email = "";
+					this.form.name = "";
+					this.form.privileged = false;
+					this.form.password = "";
+				} else {
+					console.log("Failed to register user");
+				}
 			} catch (e) {
 				const message = (e as ErrorEvent).message.split(" ");
 				this.error = message[message.length - 1];

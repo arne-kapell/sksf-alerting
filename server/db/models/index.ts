@@ -229,10 +229,14 @@ User.init({
 
 // Relations
 Alarm.belongsTo(Checklist, {
-	foreignKey: "checklistId"
+	foreignKey: "checklistId",
+	onUpdate: "NO ACTION",
+	constraints: false,
 });
 Checklist.hasMany(Alarm, {
-	foreignKey: "checklistId"
+	foreignKey: "checklistId",
+	foreignKeyConstraint: false,
+	onUpdate: "NO ACTION"
 });
 Checklist.belongsToMany(Action, {
 	through: ChecklistAction,

@@ -19,9 +19,7 @@ export const mutations: MutationTree<RootState> = {
 
 export const actions: ActionTree<RootState, RootState> = {
 	async getAlarms({ commit }, limit=100) {
-		console.log("getting alarms");
 		const res = await this.$axios.$get("/alarms/" + limit);
-		console.log(res);
 		commit("SET_ALARMS", res.alarms);
 	}
 };
