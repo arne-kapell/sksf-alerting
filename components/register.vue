@@ -7,7 +7,7 @@
                             <v-container>
 								<h1 class="text-h2" style="text-align: center;">Register</h1>
                                 <v-text-field type="text" v-model="form.email" label="E-Mail" :rules="form.emailRules" required />
-                                <v-text-field type="text" v-model="form.name" label="Name" :rules="form.nameRules" required />
+                                <v-text-field type="text" v-model="form.name" label="Name" :rules="form.nameRules" />
                                 <v-checkbox type="checkbox" v-model="form.privileged" label="Privileged" required />
                                 <v-text-field type="password" v-model="form.password" label="Password" :rules="form.pwRules" required />
 								<v-row class="d-flex flex-row justify-center my-2">
