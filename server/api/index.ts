@@ -76,30 +76,46 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
 
 // Middleware for starting socket.io server
 app.use(async (req: Request, res: Response, next: NextFunction) => {
-	if (!io) {
-		const running = await portUsed.check(3001);
-		if (running) {
-			console.warn("Socket.io server already running, if in development mode please restart nuxt!");
-		} else {
-			io = new Server(3001, {
+	const startServer = async (port: number| null) => {
+		if (port) {
+			io = new Server(port, {
 				cors: {
 					origin: `${(process.env.NODE_ENV === "development") ? "http" : "https"}://${process.env.HOST || "localhost"}`,
 					methods: ["GET", "POST"]
 				}
 			});
-
-			io.path("/socket.io");
-			console.info("Started socket.io server");
-		
-			io.use(socketAuth);
-		
-			io.on("connection", async (socket) => {
-				socket.join("alarms");
-				console.log("Client connected | sockets:", await io?.allSockets());
-				socket.on("disconnect", async () => {
-					console.log("Client disconnected | sockets:", await io?.allSockets());
-				});
+		} else {
+			io = new Server({
+				cors: {
+					origin: `${(process.env.NODE_ENV === "development") ? "http" : "https"}://${process.env.HOST || "localhost"}`,
+					methods: ["GET", "POST"]
+				}
 			});
+		}
+
+		io.path("/socket.io");
+		console.info("Started socket.io server");
+	
+		io.use(socketAuth);
+	
+		io.on("connection", async (socket) => {
+			socket.join("alarms");
+			console.log("Client connected | sockets:", await io?.allSockets());
+			socket.on("disconnect", async () => {
+				console.log("Client disconnected | sockets:", await io?.allSockets());
+			});
+		});
+	};
+	if (!io) {
+		if (process.env.NODE_ENV === "development") {
+			const running = await portUsed.check(3001);
+			if (running) {
+				console.warn("Socket.io server already running, if in development mode please restart nuxt!");
+			} else {
+				await startServer(3001);
+			}
+		} else {
+			await startServer(null);
 		}
 	}
 	next();
