@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer permanent height="100%"  mobile-breakpoint="">
+  <v-navigation-drawer height="100%"   mobile-breakpoint="">
     <v-divider></v-divider>
       <v-list >
         <v-list-item-group v-model="selectedItem" color="accent">
@@ -9,10 +9,10 @@
             :to="item.path"
           >
             <v-list-item-icon class="pa-md-4 mx-lg-auto">
-              <v-icon v-text="item.icon" color="black"></v-icon>
+              <v-icon v-text="item.icon" color="info"></v-icon>
             </v-list-item-icon>
             <v-list-item-content>
-              <v-list-item-title v-text="item.text"></v-list-item-title>
+              <v-list-item-title v-text="item.text" color="info"></v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </v-list-item-group>

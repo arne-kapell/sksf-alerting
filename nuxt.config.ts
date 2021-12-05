@@ -110,7 +110,7 @@ const config: NuxtConfig = {
 					primary: colors.blue.darken2,
 					accent: colors.grey.darken3,
 					secondary: colors.amber.darken3,
-					info: colors.teal.lighten1,
+					info: "#ffffff" ,
 					warning: colors.amber.base,
 					error: colors.deepOrange.accent4,
 					success: colors.green.accent3
@@ -119,7 +119,7 @@ const config: NuxtConfig = {
 					primary: "#ffffff",
 					accent: "#3068ab",
 					secondary: "#e9eaed",
-					info: colors.teal.lighten1,
+					info: "#000000",
 					warning:"#eeba22" ,
 					error: "#cd424f",
 					success: colors.green.accent3

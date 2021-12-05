@@ -1,8 +1,6 @@
 <template>
-  <div id="root" >
-    <v-app>
+    <!-- <v-app>
       <v-container class="main-page container--fluid">
-        <!-- <NavBarUp/> -->
         <v-col class="col-2" id="menu-side">
           <MenuSide/>
         </v-col>
@@ -10,8 +8,16 @@
           <CheckListe/>
         </v-col>
       </v-container>
-    </v-app>
-  </div>
+    </v-app> -->
+
+  <v-row  class="full-height" style="height: 100vh">
+      <v-col class="col-2 pa-0">
+        <MenuSide/>
+      </v-col>
+      <v-col class="col-10 my-4">
+        <check-liste/>
+      </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">
@@ -34,14 +40,6 @@ export default Vue.extend({
 body {
   margin: 0;
   padding: 0;
-}
-#root {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow-y: scroll;
-  /* background-color: primary; */
 }
 
 .main-page{

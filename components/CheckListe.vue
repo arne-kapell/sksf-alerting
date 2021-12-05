@@ -2,6 +2,7 @@
 /* eslint-disable vue/valid-v-slot */
 </script>
 <template>
+<v-container>
   <v-data-table
     :headers="headers"
     :items="checklists"
@@ -67,6 +68,7 @@
       </v-list-item-content>
     </template>
   </v-data-table>
+</v-container>  
 </template>
 
 <script lang="ts">
