@@ -192,10 +192,12 @@ app.post("/realtime-alarm", async (req: Request, res: Response) => {
 	}
 	const inDb = await Alarm.findByPk(uid);
 	const checklist = await Checklist.findOne({ where: { source: inDb.get("source") } });
-	const checklistId = checklist.get("uid");
-	inDb.set({
-		checklistId
-	});
+	if (checklist) {
+		const checklistId = checklist.get("uid");
+		inDb.set({
+			checklistId
+		});
+	}
 	const final = await inDb.save();
 	res.json({ success: true, uid: (final.uid) | final.get("uid"), checklistId: final.get("checklistId") });
 	notify(alarm);

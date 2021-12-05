@@ -1,15 +1,17 @@
 declare type ActionType = {
     uid: number,
     name: string,
-    function: string, // category?
+    function: string,
     responsiblePerson?: string,
     info?: string
 }
 
+declare type Source = "DDOS-Detector" | "AccountBruteforceChecker" | "flightplanChecker" | "OverloadModule" | "RadarChecker" | "TerminalForwarder"
+
 declare type Checklist = {
     uid: number,
     name: string,
-    source: string,
+    source: Source,
     actions?: Action[]
 }
 
@@ -17,7 +19,7 @@ declare type Alarm = {
     uid: number,
     risk: number,
     api: string,
-    source: string,
+    source: Source,
     checklistId: number,
     progress: number,
     message: string,
