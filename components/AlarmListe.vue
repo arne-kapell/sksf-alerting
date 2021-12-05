@@ -15,8 +15,8 @@
 
 				<!-- source Template -->
 				<template v-slot:item.source="{ item }">
-					<v-list-item-content>
-						<v-chip label >
+					<v-list-item-content style="width: min-content;">
+						<v-chip label color="accent">
 							{{ item.source }}
 						</v-chip>
 					</v-list-item-content>
@@ -24,8 +24,8 @@
 
 				<!-- api Template -->
 				<template v-slot:item.api="{ item }">
-					<v-list-item-content>
-						<v-chip label >
+					<v-list-item-content style="width: min-content;">
+						<v-chip label>
 							{{ item.api }}
 						</v-chip>
 					</v-list-item-content>
@@ -47,7 +47,7 @@
 					{{item.value = parseZeitpunkt(item.value)}}
 				</template>
 
-				<template v-slot:top>
+				<template v-slot:top="item">
 					<v-toolbar flat style="background-color: transparent;">
 						<v-toolbar-title>Überblick</v-toolbar-title>
 						<v-spacer />
@@ -72,7 +72,7 @@
 						v-model="dialogChecklist"
 						width="500"
 						>
-						<v-card>
+						<v-card :loading="loadingProgress">
 							<v-card-title class="text-h5 accent">
 								<span>Checklist: <b>{{ currentChecklist.name }}</b></span>
 								<v-chip label class="ml-auto">{{ currentChecklist.source }}</v-chip>
@@ -86,7 +86,7 @@
 										v-for="action in currentChecklist.actions"
 										:key="action.uid"
 									>
-										<template v-slot:default="{ active }">
+										<template v-slot:default>
 											<v-list-item-content>
 												<v-list-item-title>{{ action.name }}</v-list-item-title>
 												<v-list-item-subtitle>{{ action.function + ((action.info) ? '(' + action.info + ')' : '') }}</v-list-item-subtitle>
@@ -94,7 +94,8 @@
 
 											<v-list-item-action>
 											<v-checkbox
-												:input-value="active"
+												:input-value="action.done"
+												@change="setProgress(currentChecklist, action, !action.done)"
 												color="accent"
 											/>
 											</v-list-item-action>
@@ -133,22 +134,22 @@
  
 				<template v-slot:item.actions="{ item }">
 					<v-list-item-content>
-						<v-container class="d-flex flex-row">
+						<v-container>
 							<v-btn
 								small
 								class="mr-2"
-								@click="openChecklist(item)"
-									:color="(!item.progress) ? 'error' : (item.progress < item.actions.length) ? 'warning' : 'success'"
+								@click="openChecklist(item.uid)"
+									:color="(!item.actions || !item.progress) ? 'error' : (item.progress < item.actions.length) ? 'warning' : 'success'"
 								>
 								Checklist
 							</v-btn>
-							<v-icon
-								small
-								@click="deleteItem(item)"
-								>
-								mdi-delete
-							</v-icon>
 						</v-container>
+					</v-list-item-content>
+				</template>
+
+				<template v-slot:item.progressPercent="{ item }">
+					<v-list-item-content style="text-align: center;">
+						<span>{{ (typeof progressPercents[alarms.indexOf(item)] === "number") ? progressPercents[alarms.indexOf(item)] + "%" : NaN }}</span>
 					</v-list-item-content>
 				</template>
 
@@ -172,6 +173,7 @@ export default Vue.extend({
 				{ text: "Module", value: "source" },
 				{ text: "Source", value: "api" },
 				{ text: "Actions", value: "actions", align: "end", sortable: false},
+				{ text: "Progress", value: "progressPercent", align: "end"},
 			],
 			editedIndex: -1,
 			editedItem: {
@@ -185,6 +187,8 @@ export default Vue.extend({
 			dialogChecklist: false,
 			currentChecklist: {} as Checklist,
 			search: "" as string,
+			progressPercents: [] as (number | false)[],
+			loadingProgress: false
 		};
 	},
 
@@ -205,17 +209,64 @@ export default Vue.extend({
 			else if (risk >= 50) return "orange";
 			else return "green";
 		},
-		openChecklist(alarm: Alarm) {
-			const index = this.alarms.indexOf(alarm);
+		openChecklist(uid: number, openNew=true) {
+			const index = this.alarms.findIndex(item => item.uid === uid);
 			this.currentChecklist = this.checklists[index] || {} as Checklist;
-			this.dialogChecklist = true;
+			if (openNew) this.dialogChecklist = true;
 		},
-			
+		async setProgress(checklist: Checklist, action: ActionType, active: boolean) {
+			this.loadingProgress = true;
+			const progress = (active) ? checklist.actions.indexOf(action) + 1 : checklist.actions.indexOf(action);
+			const alarm = this.alarms[this.checklists.indexOf(checklist)];
+			console.log(alarm.uid, progress, active);
+			const res = await this.$axios.$put("/alarms/progress", {
+				uid: alarm.uid,
+				progress: progress,
+			});
+			console.log(res);
+			if (res.success) {
+				this.checklists[this.alarms.indexOf(alarm)] = res.data;
+				this.progressPercents[this.alarms.indexOf(alarm)] = (active) ? (progress / checklist.actions.length) * 100 : false;
+			}
+			this.loadingProgress = false;
+			this.$store.dispatch("getAlarms");
+			setTimeout(() => {
+				this.openChecklist(alarm.uid, false);
+			}, 500);
+		},
 		closeChecklist () {
 			this.dialogChecklist = false;
 			this.$nextTick(() => {
 				this.currentChecklist = {} as Checklist;
 			});
+		},
+
+		async calculateLists(alarms: Alarm[]) {
+			const asyncForEach = async (array: any[], callback: (item: any, index: number, array: any[]) => Promise<void>) => {
+				for (let index = 0; index < array.length; index++) {
+					await callback(array[index], index, array);
+				}
+			};
+			const uids: number[] = alarms.map((alarm: Alarm) => alarm.checklistId | 0);
+			const checklists: (Checklist | false)[] = [];
+			const progressPercents: (number | false)[] = [];
+			await asyncForEach(uids, async (uid: number, i: number) => {
+				if (uid) {
+					const res = await this.$axios.get("/checklist/" + uid);
+					const checklist = res.data as Checklist;
+					checklist.actions = checklist.actions.map((action: ActionType, index: number) => ({
+						...action,
+						done: index < alarms[i].progress
+					}));
+					checklists.push(checklist);
+					progressPercents.push(Math.round(alarms[i].progress / res.data.actions.length * 100) | 0);
+				} else {
+					checklists.push(false);
+					progressPercents.push(false);
+				}
+			});
+			this.checklists = checklists;
+			this.progressPercents = progressPercents;
 		}
 	},
 	computed: {
@@ -231,25 +282,12 @@ export default Vue.extend({
 			};
 		}
 	},
+	async mounted() {
+		await this.calculateLists(this.alarms);
+	},
 	watch: {
 		async alarms (alarms) {
-			const asyncForEach = async (array: any[], callback: (item: any, index: number, array: any[]) => Promise<void>) => {
-				for (let index = 0; index < array.length; index++) {
-					await callback(array[index], index, array);
-				}
-			};
-			const uids: number[] = alarms.map((alarm: Alarm) => alarm.checklistId | 0);
-			const checklists: (Checklist | false)[] = [];
-			asyncForEach(uids, async (uid: number) => {
-				if (uid) {
-					const res = await this.$axios.get("/checklist/" + uid);
-					checklists.push(res.data as Checklist);
-				} else {
-					checklists.push(false);
-				}
-			});
-			console.log(uids, checklists);
-			this.checklists = checklists;
+			await this.calculateLists(alarms);
 		}
 	}
 });

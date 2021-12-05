@@ -75,7 +75,7 @@ const config: NuxtConfig = {
 		sockets: [
 			{
 				name: "alarms",
-				url: `${(process.env.NODE_ENV === "development") ? "http" : "https"}://localhost${(process.env.NODE_ENV === "development") ? ":3001" : ""}/api/alarms`,
+				url: "http://localhost:3001",
 				default: true,
 				vuex: {
 					actions: [

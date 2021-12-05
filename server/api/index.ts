@@ -76,46 +76,30 @@ const socketAuth = async (socket: Socket, next: (err?: Error) => void) => {
 
 // Middleware for starting socket.io server
 app.use(async (req: Request, res: Response, next: NextFunction) => {
-	const startServer = async (port: number| null) => {
-		if (port) {
-			io = new Server(port, {
-				cors: {
-					origin: `${(process.env.NODE_ENV === "development") ? "http" : "https"}://${process.env.HOST || "localhost"}`,
-					methods: ["GET", "POST"]
-				}
-			});
-		} else {
-			io = new Server({
-				cors: {
-					origin: `${(process.env.NODE_ENV === "development") ? "http" : "https"}://${process.env.HOST || "localhost"}`,
-					methods: ["GET", "POST"]
-				}
-			});
-		}
-
-		io.path("/socket.io");
-		console.info("Started socket.io server");
-	
-		io.use(socketAuth);
-	
-		io.on("connection", async (socket) => {
-			socket.join("alarms");
-			console.log("Client connected | sockets:", await io?.allSockets());
-			socket.on("disconnect", async () => {
-				console.log("Client disconnected | sockets:", await io?.allSockets());
-			});
-		});
-	};
 	if (!io) {
-		if (process.env.NODE_ENV === "development") {
-			const running = await portUsed.check(3001);
-			if (running) {
-				console.warn("Socket.io server already running, if in development mode please restart nuxt!");
-			} else {
-				await startServer(3001);
-			}
+		const running = await portUsed.check(3001);
+		if (running) {
+			console.warn("Socket.io server already running, if in development mode please restart nuxt!");
 		} else {
-			await startServer(null);
+			io = new Server(3001, {
+				cors: {
+					origin: "http://localhost:3000",
+					methods: ["GET", "POST"]
+				}
+			});
+
+			io.path("/socket.io");
+			console.info("Started socket.io server");
+	
+			io.use(socketAuth);
+	
+			io.on("connection", async (socket) => {
+				socket.join("alarms");
+				console.log("Client connected | sockets:", await io?.allSockets());
+				socket.on("disconnect", async () => {
+					console.log("Client disconnected | sockets:", await io?.allSockets());
+				});
+			});
 		}
 	}
 	next();
@@ -213,6 +197,19 @@ app.post("/realtime-alarm", async (req: Request, res: Response) => {
 	const final = await inDb.save();
 	res.json({ success: true, uid: (final.uid) | final.get("uid"), checklistId: final.get("checklistId") });
 	notify(alarm);
+});
+
+// Endpoint for setting progress on alarms
+app.put("/alarms/progress", expressAuth, async (req: Request, res: Response) => {
+	const { uid, progress } = req.body;
+	const alarm = await Alarm.findOne({ where: { uid } });
+	if (alarm) {
+		alarm.set({ progress });
+		const final = await alarm.save();
+		res.json({ success: true, uid: final.get("uid"), progress: final.get("progress") });
+	} else {
+		res.status(404).json({ error: "Alarm not found" });
+	}
 });
 
 // Alarm endpoint for ui
