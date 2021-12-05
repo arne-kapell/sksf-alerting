@@ -49,7 +49,7 @@
 
 				<template v-slot:top="item">
 					<v-toolbar flat style="background-color: transparent;">
-						<v-toolbar-title>Überblick</v-toolbar-title>
+						<v-toolbar-title>Dashboard</v-toolbar-title>
 						<v-spacer />
 						<v-container class="d-flex justify-end align-center mr-0 mt-1" style="width: min-content;">
 							<v-progress-circular :rotate="-90" v-if="stats.high" :value="stats.high / stats.total * 100" color="orange" :size="50" class="mx-1">{{ stats.high }}</v-progress-circular>
@@ -184,11 +184,9 @@ export default Vue.extend({
 				risk: 0,
 				source: 0,
 			},
-			// checklists: [] as (Checklist | false)[],
 			dialogChecklist: false,
 			currentChecklist: {} as Checklist,
 			search: "" as string,
-			// progressPercents: [] as (number | false)[],
 			loadingProgress: false
 		};
 	},
@@ -240,35 +238,7 @@ export default Vue.extend({
 			this.$nextTick(() => {
 				this.currentChecklist = {} as Checklist;
 			});
-		},
-
-		// async calculateLists(alarms: Alarm[]) {
-		// 	const asyncForEach = async (array: any[], callback: (item: any, index: number, array: any[]) => Promise<void>) => {
-		// 		for (let index = 0; index < array.length; index++) {
-		// 			await callback(array[index], index, array);
-		// 		}
-		// 	};
-		// 	const uids: number[] = alarms.map((alarm: Alarm) => alarm.checklistId | 0);
-		// 	const checklists: (Checklist | false)[] = [];
-		// 	const progressPercents: (number | false)[] = [];
-		// 	await asyncForEach(uids, async (uid: number, i: number) => {
-		// 		if (uid) {
-		// 			const res = await this.$axios.get("/checklist/" + uid);
-		// 			const checklist = res.data as Checklist;
-		// 			checklist.actions = checklist.actions.map((action: ActionType, index: number) => ({
-		// 				...action,
-		// 				done: index < alarms[i].progress
-		// 			}));
-		// 			checklists.push(checklist);
-		// 			progressPercents.push(Math.round(alarms[i].progress / res.data.actions.length * 100) | 0);
-		// 		} else {
-		// 			checklists.push(false);
-		// 			progressPercents.push(false);
-		// 		}
-		// 	});
-		// 	this.checklists = checklists;
-		// 	this.progressPercents = progressPercents;
-		// }
+		}
 	},
 	computed: {
 		alarms() {

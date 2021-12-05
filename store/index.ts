@@ -22,9 +22,10 @@ export const mutations: MutationTree<RootState> = {
 };
 
 export const actions: ActionTree<RootState, RootState> = {
-	async getAlarms({ commit }, limit=100) {
+	async getAlarms({ commit, dispatch }, limit=100) {
 		const res = await this.$axios.$get("/alarms/" + limit);
 		commit("SET_ALARMS", res.alarms);
+		dispatch("getChecklistWithPP");
 	},
 	async getChecklistWithPP({ state, commit }) {
 		const alarms = state.alarms;

@@ -34,7 +34,7 @@ export default {
 			{
 				text: "Checkliste",
 				icon: "mdi-email",
-				path: "/krisenwerkzeuge"
+				path: "/checklists"
 			},
       { 
         text: "Account",

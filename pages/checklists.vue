@@ -17,8 +17,11 @@
 <script lang="ts">
 import Vue from "vue";
 export default Vue.extend({
-	// middleware: "auth",
+	middleware: "auth",
 	layout: "main",
+  head() {
+    return { title: "Checklists" }
+  },
 	data() {
 		return {
 			light: true
