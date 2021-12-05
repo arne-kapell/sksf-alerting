@@ -1,6 +1,6 @@
 <template>
       <!-- <v-container fluid class="full-height"> -->
-        <v-row class="full-height" style="height: 100%">
+        <v-row class="full-height" style="height: 100vh">
           <v-col class="col-2 pa-0">
             <menu-side/>
           </v-col>
