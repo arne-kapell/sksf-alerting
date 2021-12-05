@@ -160,20 +160,34 @@ app.get("/user-info", expressAuth, async (req: Request, res: Response) => {
 // Helper function to notify ui via socket.io and passengers via information system api about new alarms
 const notify = async (alarm: Alarm) => {
 	io?.emit("alarm");
-	try {
-		await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
-			level: (alarm.risk <= 50) ? "info" : "warning",
-			message: alarm.message
-		}], {
-			withCredentials: true,
-			auth: {
-				username: "tinf19cs",
-				password: process.env.API_PASSWORD
-			} as AxiosBasicCredentials
-		});
-	} catch (e) {
-		console.error("Error sending alarm to 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+	const message = mapAlarmToPassengerNotification(alarm);
+	if (message) {
+		try {
+			await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
+				level: (alarm.risk <= 50) ? "info" : "warning",
+				message: alarm.message
+			}], {
+				withCredentials: true,
+				auth: {
+					username: "tinf19cs",
+					password: process.env.API_PASSWORD
+				} as AxiosBasicCredentials
+			});
+		} catch (e) {
+			console.error("Error sending alarm to 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+		}
 	}
+};
+const mapAlarmToPassengerNotification = (alarm: Alarm): string | false => {
+	const dict: {[key in Source]: string | false} = {
+		"DDOS-Detector": "Our IT systems are experiencing an unusually high load at the moment. You might experience some problems.",
+		AccountBruteforceChecker: false,
+		OverloadModule: "Our IT systems are experiencing an unusually high load at the moment. You might experience some problems.",
+		RadarChecker: false,
+		TerminalForwarder: false,
+		flightplanChecker: false
+	};
+	return dict[alarm.source];
 };
 
 // Realtime alarm endpoint for analysis modules
@@ -297,15 +311,12 @@ app.post("/checklist", expressAuth, async (req: Request, res: Response) => {
 	});
 	const checklist = await Checklist.create({
 		name,
-		source,
-		Actions: actions
-	}, {
-		include: [ { model: Action, as: "Actions" } ]
+		source
 	});
 	await asyncForEach(actions, async (a: Action) => {
 		await ChecklistAction.create({
 			checklistId: checklist.uid,
-			actionId: a.uid
+			actionId: (a.uid) | a.get("uid")
 		});
 	});
 	const final = await Checklist.findByPk(checklist.uid, {

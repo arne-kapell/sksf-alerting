@@ -1,7 +1,7 @@
 declare type ActionType = {
     uid: number,
-    name: string,
-    function: string,
+    name?: string,
+    function?: string,
     responsiblePerson?: string,
     info?: string
 }
