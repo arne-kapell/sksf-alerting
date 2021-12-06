@@ -7,12 +7,14 @@ import axios, { AxiosBasicCredentials, AxiosError } from "axios";
 import db from "../db";
 import { Action, Alarm, Checklist, ChecklistAction, User } from "../db/models";
 import { asyncForEach } from "./helpers";
+
 const app = express();
+app.use(json());
+
 let io: Server | null = null;
 
 // Sync database
 const syncOptions = {
-	// force: true,
 	alter: process.env.NODE_ENV === "development"
 };
 db.modelManager.addModel(Action);
@@ -22,7 +24,6 @@ db.modelManager.addModel(ChecklistAction);
 db.modelManager.addModel(User);
 db.sync(syncOptions);
 
-app.use(json());
 
 // Authentication middlewares
 const tokenSecret = process.env.JWT_SECRET || "secret_sks-f";
@@ -158,15 +159,11 @@ app.get("/user-info", expressAuth, async (req: Request, res: Response) => {
 });
 
 // Helper function to notify ui via socket.io and passengers via information system api about new alarms
-const notify = async (alarm: Alarm) => {
-	io?.emit("alarm");
-	const message = mapAlarmToPassengerNotification(alarm);
-	if (message) {
+let clearMessageTimeout: NodeJS.Timeout | null = null;
+const notify = async (alarm: Alarm, clearMessage=false) => {
+	if (clearMessage) {
 		try {
-			await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
-				level: (alarm.risk <= 50) ? "info" : "warning",
-				message: message
-			}], {
+			await axios.post("http://asm.fl.dlr.de:10001/terminal", [], {
 				withCredentials: true,
 				auth: {
 					username: "tinf19cs",
@@ -174,7 +171,37 @@ const notify = async (alarm: Alarm) => {
 				} as AxiosBasicCredentials
 			});
 		} catch (e) {
-			console.error("Error sending alarm to 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+			console.error("Error clearing alarm from 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+		}
+		clearMessageTimeout = null;
+	} else {
+		io?.emit("alarm");
+		const message = mapAlarmToPassengerNotification(alarm);
+		if (message) {
+			try {
+				await axios.post("http://asm.fl.dlr.de:10001/terminal", [{
+					level: (alarm.risk <= 75) ? "info" : "warning",
+					message: message
+				}], {
+					withCredentials: true,
+					auth: {
+						username: "tinf19cs",
+						password: process.env.API_PASSWORD
+					} as AxiosBasicCredentials
+				});
+				if (!clearMessageTimeout) {
+					clearMessageTimeout = setTimeout(() => {
+						notify(alarm);
+					}, 30 * 60 * 1000);
+				} else {
+					clearTimeout(clearMessageTimeout);
+					clearMessageTimeout = setTimeout(() => {
+						notify(null, true);
+					}, 30 * 60 * 1000);
+				}
+			} catch (e) {
+				console.error("Error sending alarm to 'Passagier Informationssystem':", (e as AxiosError).response?.status);
+			}
 		}
 	}
 };
