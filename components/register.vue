@@ -1,11 +1,9 @@
 <template>
-    <v-app>
-            <v-main fluid>
                 <v-container>
-                    <v-card shaped :loading="loading">
+                    <v-card :loading="loading" elevation="10">
                         <v-form v-model="form.valid" @submit="register">
                             <v-container>
-								<h1 class="text-h2" style="text-align: center;">Register</h1>
+								<h4 class="text-h4">Register new user</h4>
                                 <v-text-field type="text" v-model="form.email" label="E-Mail" :rules="form.emailRules" required />
                                 <v-text-field type="text" v-model="form.name" label="Name" :rules="form.nameRules" />
                                 <v-checkbox type="checkbox" v-model="form.privileged" label="Privileged" required />
@@ -18,8 +16,6 @@
                         </v-form>
                     </v-card>
                 </v-container>
-            </v-main>
-    </v-app>
 </template>
 
 <script lang="ts">
@@ -74,6 +70,7 @@ export default Vue.extend({
 					this.form.name = "";
 					this.form.privileged = false;
 					this.form.password = "";
+					this.form.valid = false;
 				} else {
 					console.log("Failed to register user");
 				}

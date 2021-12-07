@@ -5,7 +5,7 @@
             <menu-side/>
           </v-col>
           <v-col class="col-10 my-4">
-            <register/>
+            <Register/>
           </v-col>
         </v-row>
       <!-- </v-container> -->
