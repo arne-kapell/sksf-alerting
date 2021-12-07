@@ -210,9 +210,9 @@ const mapAlarmToPassengerNotification = (alarm: Alarm): string | false => {
 		"DDOS-Detector": "Our IT systems are experiencing an unusually high load at the moment. You might experience some problems.",
 		AccountBruteforceChecker: false,
 		OverloadModule: "Our IT systems are experiencing an unusually high load at the moment. You might experience some problems.",
-		RadarChecker: false,
+		RadarChecker: "Our radar systems are currently facing troubles. our flight may be delayed.",
 		TerminalForwarder: false,
-		flightplanChecker: false
+		flightplanChecker: "The flightplan could have missing or incorrect information. Please check your flightplan."
 	};
 	return dict[alarm.source];
 };
