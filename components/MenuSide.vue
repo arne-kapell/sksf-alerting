@@ -24,30 +24,30 @@
 export default {
 	name: "MenuSide",
 	data: () => ({
-    selectedItem: 1,
+		selectedItem: 1,
 		items: [
 			{ 
-        text: "Home", 
-        icon: "mdi-home",
-        path: "/"
-      },
+				text: "Dashboard", 
+				icon: "mdi-view-dashboard-variant-outline",
+				path: "/"
+			},
 			{
-				text: "Checkliste",
-				icon: "mdi-email",
+				text: "Checklists",
+				icon: "mdi-clipboard-list-outline",
 				path: "/checklists"
 			},
-      { 
-        text: "Account",
-        icon: "mdi-account-box",
-        path: "/account"
-      }
+			{ 
+				text: "Users",
+				icon: "mdi-account-multiple-plus-outline",
+				path: "/account"
+			}
 		],
     
 	}),
-  computed: {
-    dataForUser() {
-      return this.items.map(item => item.text !== "Account" || this.$auth.user.privileged ? item : null);
-    }
-  }
+	computed: {
+		dataForUser() {
+			return this.items.map(item => item.text !== "Account" || this.$auth.user.privileged ? item : null);
+		}
+	}
 };
 </script>
