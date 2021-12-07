@@ -88,9 +88,9 @@ export default {
         { text: "Module", value: "source" },
         { text: "Actions", value: "actions" },
       ],
-	  dialogChecklist: false,
-	  currentChecklist: {} as Checklist,
-	  checklists: [] as Checklist[],
+    dialogChecklist: false,
+    currentChecklist: {} as Checklist,
+    checklists: [] as Checklist[],
     loading: true,
     };
   },
@@ -115,7 +115,7 @@ export default {
     this.loading = false;
   },
   mounted() {
-	  this.$fetch();
+    this.$fetch();
   }
 };
 </script>

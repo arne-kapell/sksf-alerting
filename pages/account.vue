@@ -19,7 +19,7 @@ export default Vue.extend({
 	layout: "main",
 	head() {
 		return {
-			title: "Dashboard",
+			title: "Register new user",
 		};
 	},
 	data() {

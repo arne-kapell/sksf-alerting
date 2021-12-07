@@ -21,12 +21,6 @@
 <script lang="ts">
 import Vue from "vue";
 export default Vue.extend({
-	layout: "main",
-	head() {
-		return {
-			title: "Register",
-		};
-	},
 	data() {
 		return {
 			loading: false,
