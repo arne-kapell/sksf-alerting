@@ -1,16 +1,5 @@
 <template>
-    <!-- <v-app>
-      <v-container class="main-page container--fluid">
-        <v-col class="col-2" id="menu-side">
-          <MenuSide/>
-        </v-col>
-        <v-col class="col-7 offset-1">
-          <CheckListe/>
-        </v-col>
-      </v-container>
-    </v-app> -->
-
-  <v-row  class="full-height" style="height: 100vh">
+  <v-row class="ma-0" style="height: 100%">
       <v-col class="col-2 pa-0">
         <MenuSide/>
       </v-col>

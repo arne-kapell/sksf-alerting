@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer height="100%"   mobile-breakpoint="">
+  <v-navigation-drawer mobile-breakpoint="">
     <v-divider></v-divider>
       <v-list >
         <v-list-item-group v-model="selectedItem" color="accent">
