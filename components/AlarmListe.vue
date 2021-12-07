@@ -225,7 +225,7 @@ export default Vue.extend({
 			console.log(res);
 			if (res.success) {
 				this.checklists[this.alarms.indexOf(alarm)] = res.data;
-				this.progressPercents[this.alarms.indexOf(alarm)] = (active) ? (progress / checklist.actions.length) * 100 : false;
+				this.progressPercents[this.alarms.indexOf(alarm)] = (active) ? Math.round((progress / checklist.actions.length) * 100) : false;
 			}
 			this.loadingProgress = false;
 			this.$store.dispatch("getAlarms");
@@ -263,9 +263,9 @@ export default Vue.extend({
 		this.$store.dispatch("getChecklistWithPP");
 	},
 	watch: {
-		async alarms (alarms) {
-			this.$store.dispatch("getChecklistWithPP");
-		}
+		// async alarms (alarms) {
+		// 	this.$store.dispatch("getChecklistWithPP");
+		// }
 	}
 });
 </script>
