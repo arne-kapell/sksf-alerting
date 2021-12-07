@@ -43,7 +43,7 @@
               </v-list>
             </v-card-text>
 
-            <v-divider></v-divider>
+            <v-divider />
 
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -53,17 +53,24 @@
         </v-dialog>
       </template>
 
+      <!-- source Template -->
+			<template v-slot:item.source="{ item }">
+				<v-list-item-content style="width: min-content;">
+					<v-chip label color="accent">
+						{{ item.source }}
+					</v-chip>
+				</v-list-item-content>
+			</template>
+
       <template v-slot:item.actions="{ item }">
-        <v-list-item-content>
-          <v-container>
-            <v-btn
-              small
-              class="mr-2"
-              @click="openChecklist(item)"
-            >
-              SHOW ACTIONS
-            </v-btn>
-          </v-container>
+        <v-list-item-content style="width: min-content;">
+          <v-btn
+            small
+            class="mr-2"
+            @click="openChecklist(item)"
+          >
+            SHOW ACTIONS
+          </v-btn>
         </v-list-item-content>
       </template>
     </v-data-table>

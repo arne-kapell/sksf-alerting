@@ -3,7 +3,7 @@
                     <v-card :loading="loading" elevation="10">
                         <v-form v-model="form.valid" @submit="register">
                             <v-container>
-								<h4 class="text-h4">Register new user</h4>
+								<h4 class="text-h4 mb-7">Register new user</h4>
                                 <v-text-field type="text" v-model="form.email" label="E-Mail" :rules="form.emailRules" required />
                                 <v-text-field type="text" v-model="form.name" label="Name" :rules="form.nameRules" />
                                 <v-checkbox type="checkbox" v-model="form.privileged" label="Privileged" required />
