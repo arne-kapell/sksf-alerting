@@ -98,6 +98,7 @@
 												:input-value="action.done"
 												@change="setProgress(currentChecklist, action, !action.done)"
 												color="accent"
+												:disabled="loadingProgress"
 											/>
 											</v-list-item-action>
 										</template>
