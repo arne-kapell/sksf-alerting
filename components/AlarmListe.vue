@@ -255,9 +255,6 @@ export default Vue.extend({
 			};
 		}
 	},
-	async mounted() {
-		this.$store.dispatch("getChecklistWithPP");
-	},
 	watch: {
 		checklists() {
 			if (this.currentIndex) this.openChecklist(false);
