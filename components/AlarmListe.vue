@@ -90,7 +90,7 @@
 										<template v-slot:default>
 											<v-list-item-content>
 												<v-list-item-title>{{ action.name }}</v-list-item-title>
-												<v-list-item-subtitle>{{ action.function + ((action.info) ? '(' + action.info + ')' : '') }}</v-list-item-subtitle>
+												<span class="secondary--text text--darken-1 font-weight-light">{{ action.function + ((action.info) ? '(' + action.info + ')' : '') }}</span>
 											</v-list-item-content>
 
 											<v-list-item-action>
