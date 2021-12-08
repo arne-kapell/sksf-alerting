@@ -10,9 +10,14 @@
         {{ (user.name) || user.mail }}
       </v-chip> 
     </v-badge>
-    <v-btn @click="logout()" color="error" id="NavBarBtn">
+    <v-tooltip bottom>
+			<template v-slot:activator="{ on, attrs }">
+				<v-btn v-bind="attrs" v-on="on" @click="logout()" color="error" id="NavBarBtn">
+          <span>Logout</span>
+        </v-btn>
+      </template>
       <span>Logout</span>
-    </v-btn>
+    </v-tooltip>
   </nav>  
 </template>
 

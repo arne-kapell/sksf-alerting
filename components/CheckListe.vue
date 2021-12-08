@@ -64,13 +64,20 @@
 
       <template v-slot:item.actions="{ item }">
         <v-list-item-content style="width: min-content;">
-          <v-btn
-            small
-            class="mr-2"
-            @click="openChecklist(item)"
-          >
-            SHOW ACTIONS
-          </v-btn>
+          <v-tooltip right>
+						<template v-slot:activator="{ on, attrs }">
+							<v-btn
+								v-bind="attrs"
+								v-on="on"
+                small
+                class="mr-2"
+                @click="openChecklist(item)"
+                >
+                Show actions
+              </v-btn>
+            </template>
+            <span>Show connected actions</span>
+          </v-tooltip>
         </v-list-item-content>
       </template>
     </v-data-table>

@@ -125,15 +125,22 @@
 				<template v-slot:item.actions="{ item }">
 					<v-list-item-content>
 						<v-container>
-							<v-btn
-								small
-								class="mr-2"
-								:disabled="!item.checklistId"
-								@click="openChecklist(item.uid)"
-									:color="(!checklists[alarms.indexOf(item)] || !checklists[alarms.indexOf(item)].actions) ? '' : (!item.progress) ? 'error' : (item.progress < checklists[alarms.indexOf(item)].actions.length) ? 'warning' : 'green'"
-								>
-								Checklist
-							</v-btn>
+							<v-tooltip right>
+								<template v-slot:activator="{ on, attrs }">
+									<v-btn
+										v-bind="attrs"
+										v-on="on"
+										small
+										class="mr-2"
+										:disabled="!item.checklistId"
+										@click="openChecklist(item.uid)"
+											:color="(!checklists[alarms.indexOf(item)] || !checklists[alarms.indexOf(item)].actions) ? '' : (!item.progress) ? 'error' : (item.progress < checklists[alarms.indexOf(item)].actions.length) ? 'warning' : 'green'"
+										>
+										Checklist
+									</v-btn>
+								</template>
+								<span>Show checklist</span>
+							</v-tooltip>
 						</v-container>
 					</v-list-item-content>
 				</template>
