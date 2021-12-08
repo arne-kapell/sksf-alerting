@@ -3,6 +3,7 @@ import { GetterTree, ActionTree, MutationTree } from "vuex";
 
 export const state = () => ({
 	alarms: [] as Alarm[],
+	loadingAlarms: true,
 	checklists: [] as Checklist[],
 	progressPercents: [] as (number | false)[],
 	numbers: 1 as number
@@ -15,14 +16,18 @@ export const getters: GetterTree<RootState, RootState> = {
 };
 
 export const mutations: MutationTree<RootState> = {
-	ADD_ALARM: (state, newAlarm: Alarm) => (state.alarms.push(newAlarm)),
+	START_LOADING_ALARMS: (state) => (state.loadingAlarms = true), 
 	SET_ALARMS: (state, alarms: Alarm[]) => (state.alarms = alarms),
 	SET_CHECKLISTS: (state, checklists: Checklist[]) => (state.checklists = checklists),
-	SET_PP: (state, progressPercents: (number | false)[]) => (state.progressPercents = progressPercents)
+	SET_PP: (state, progressPercents: (number | false)[]) => {
+		state.progressPercents = progressPercents;
+		state.loadingAlarms = false;
+	}
 };
 
 export const actions: ActionTree<RootState, RootState> = {
 	async getAlarms({ commit, dispatch }, limit=100) {
+		commit("START_LOADING_ALARMS");
 		const res = await this.$axios.$get("/alarms/" + limit);
 		commit("SET_ALARMS", res.alarms);
 		dispatch("getChecklistWithPP");

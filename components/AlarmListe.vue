@@ -12,6 +12,7 @@
 			:search="search"
 			multi-sort
 			class="elevation-1"
+			:loading="loadingAlarms"
 			>
 
 				<!-- source Template -->
@@ -238,6 +239,9 @@ export default Vue.extend({
 				...item,
 				progressPercent: this.$store.state.progressPercents[i]
 			}));
+		},
+		loadingAlarms() {
+			return this.$store.state.loadingAlarms;
 		},
 		checklists() {
 			return this.$store.state.checklists;
