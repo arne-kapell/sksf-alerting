@@ -46,7 +46,7 @@ export default {
 	}),
 	computed: {
 		dataForUser() {
-			return this.items.map(item => item.text !== "Account" || this.$auth.user.privileged ? item : null);
+			return this.items.map(item => item.text !== "Users" || this.$auth.user.privileged ? item : null);
 		}
 	}
 };
